@@ -62,7 +62,9 @@ uses
 
 function SplitStringAt(const aLen: Integer; const aSrcStr: string): TArray<string>;
 var
-  srcLen, idx, count: Integer;
+  count: Integer;
+  idx: Integer;
+  srcLen: Integer;
 begin
   SetLength(Result, 0);
   srcLen := Length(aSrcStr);
@@ -88,9 +90,9 @@ end;
 
 function SplitText(const aText: string; const aMaxLen: Integer): TArray<string>;
 var
-  strLines, lineSplitStrs: TArray<string>;
-  text: string;
   I, J, K: Integer;
+  lineSplitStrs, strLines: TArray<string>;
+  text: string;
 begin
   SetLength(Result, 0);
 
@@ -100,7 +102,7 @@ begin
   // Splits at each CR *and* each LF! Delimiters denotes set of single characters used to
   // split string. Each character in Delimiters string will be used as one of possible
   // delimiters.
-  strLines := TArray<string>(SplitString(text, #13#10));
+  strLines := SplitString(text, #13#10);
 
   K := 0;
 
@@ -112,15 +114,15 @@ begin
     SetLength(Result, K);
 
     for J := 0 to Length(lineSplitStrs) - 1 do
-      Result[K - 1 + J] := lineSplitStrs[J];
+      Result[K - Length(lineSplitStrs) + J] := lineSplitStrs[J];
   end;
 end;
 
 {$IFDEF MSWINDOWS}
 function GetConsoleWidth: Integer;
 var
-  info: CONSOLE_SCREEN_BUFFER_INFO;
   hStdOut: THandle;
+  info: CONSOLE_SCREEN_BUFFER_INFO;
 begin
   // Default is unlimited width
   Result := High(Integer);
@@ -143,7 +145,7 @@ end;
 
 function StringToBoolean(const aValue: string): Boolean;
 const
-  sInvalidBooleanString = 'Invalid string, not Boolean compliant.';
+  sInvalidBooleanStr = 'Invalid string, not Boolean compliant.';
 begin
   if MatchText(aValue, TrueStrings) then
     Result := True
@@ -151,7 +153,7 @@ begin
     if MatchText(aValue, FalseStrings) then
       Result := False
     else
-      raise Exception.Create(sInvalidBooleanString);
+      raise Exception.Create(sInvalidBooleanStr);
 end;
 
 procedure StripQuotes(var aString: string);
@@ -166,8 +168,7 @@ begin
   if strLen < minStrLen then
     Exit;
 
-  if CharInSet(aString[1], quoteCharSet) and CharInSet(aString[strLen], quoteCharSet)
-  then
+  if CharInSet(aString[1], quoteCharSet) and CharInSet(aString[strLen], quoteCharSet) then
   begin
     Delete(aString, strLen, 1);
     Delete(aString, 1, 1);

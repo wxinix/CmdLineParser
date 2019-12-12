@@ -425,12 +425,12 @@ var
   def: IOptionDefinition;
   parseResult: ICmdLineParseResult;
   sList: TStringList;
-  Test: TExampleEnum;
+  test: TExampleEnum;
 begin
   def := TOptionsRegistry.RegisterOption<TExampleEnum>('test', 't',
     procedure(const value: TExampleEnum)
     begin
-      Test := value;
+      test := value;
     end);
 
   sList := TStringList.Create;
@@ -451,12 +451,12 @@ var
   def: IOptionDefinition;
   parseResult: ICmdLineParseResult;
   sList: TStringList;
-  Test: TExampleSet;
+  test: TExampleSet;
 begin
   def := TOptionsRegistry.RegisterOption<TExampleSet>('test', 't',
     procedure(const value: TExampleSet)
     begin
-      Test := value;
+      test := value;
     end);
 
   sList := TStringList.Create;
