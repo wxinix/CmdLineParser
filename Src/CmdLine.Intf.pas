@@ -9,7 +9,7 @@ uses
 
 type
   TOptionValueParsedAction<T> = reference to procedure(const aValue: T);
-  TPrintUsageAction = reference to procedure(const aUsageText: string);
+  TPrintUsageAction = reference to procedure(const aText: string);
 
   IOptionDefinition = interface
     ['{1EAA06BA-8FBF-43F8-86D7-9F5DE26C4E86}']
