@@ -243,8 +243,7 @@ begin
 end;
 
 class function TOptionsRegistry.RegisterCommand(const aName, aAlias, aDescription,
-  aHelpString, aUsage: string; const aVisible: Boolean = True)
-  : TCommandDefinitionRecord;
+  aHelpString, aUsage: string; const aVisible: Boolean = True): TCommandDefinitionRecord;
 var
   cmdDef: ICommandDefinition;
   params: TCommandDefinitionCreateParams;
@@ -356,10 +355,10 @@ begin
 {$REGION 'TEnumerateCommandOptionsAction'}
     procedure(const aOption: IOptionDefinition)
     var
+      al: Integer;
       descStrings: TArray<string>;
       I: Integer;
       numDescStrings: Integer;
-      al: Integer;
       s: string;
     begin
       descStrings := SplitText(aOption.HelpText, maxDescW);

@@ -18,20 +18,20 @@ var
 begin
   try
     TDUnitX.CheckCommandLine;
-    //Create the runner
+    // Create the runner
     runner := TDUnitX.CreateRunner;
     runner.UseRTTI := True;
-    //tell the runner how we will log things
+    // Tell the runner how we will log things
     logger := TDUnitXConsoleLogger.Create(false);
     nunitLogger := TDUnitXXMLNUnitFileLogger.Create;
     runner.AddLogger(logger);
     runner.AddLogger(nunitLogger);
-    //Run tests
+    // Run tests
     results := runner.Execute;
 {$IFNDEF CI}
-    //We don't want this happening when running under CI.
-    System.Write('Done.. press <Enter> key to quit.');
-    System.Readln;
+    // We don't want this happening when running under CI.
+    Write('Done.. press <Enter> key to quit.');
+    ReadLn;
 {$ENDIF}
   except
     on E: Exception do
