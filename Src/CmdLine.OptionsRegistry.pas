@@ -109,9 +109,9 @@ type
 implementation
 
 uses
-  Generics.Defaults,
   System.StrUtils,
   System.SysUtils,
+  Generics.Defaults,
   CmdLine.Consts,
   CmdLine.CommandDefinition,
   CmdLine.OptionDefinition,
