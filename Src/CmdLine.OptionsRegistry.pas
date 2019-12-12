@@ -110,8 +110,8 @@ implementation
 
 uses
   Generics.Defaults,
-  SysUtils,
-  StrUtils,
+  System.StrUtils,
+  System.SysUtils,
   CmdLine.Consts,
   CmdLine.CommandDefinition,
   CmdLine.OptionDefinition,
