@@ -203,8 +203,8 @@ var
   cmd: ICommandDefinition;
   descStrings: TArray<string>;
   I: Integer;
-  numDescStrings: Integer;
   maxDescW: Integer;
+  numDescStrings: Integer;
 begin
   aProc('');
   if FCommandDefs.Count > 0 then
@@ -231,10 +231,9 @@ begin
         aProc('');
       end;
     end;
-    PrintUsage(FDefaultCommand.FCommandDef, aProc);
-  end
-  else
-    PrintUsage(FDefaultCommand.FCommandDef, aProc);
+  end;
+  
+  PrintUsage(FDefaultCommand.FCommandDef, aProc);
 end;
 
 class function TOptionsRegistry.RegisterAnonymousOption<T>(const aHelpText: string;
@@ -316,7 +315,7 @@ begin
 end;
 
 class procedure TOptionsRegistry.PrintUsage(const aCommand: ICommandDefinition;
-const aProc: TPrintUsageAction);
+  const aProc: TPrintUsageAction);
 var
   maxDescW: Integer;
 begin
