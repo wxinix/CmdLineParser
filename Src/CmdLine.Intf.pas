@@ -13,34 +13,34 @@ type
 
   IOptionDefinition = interface
     ['{1EAA06BA-8FBF-43F8-86D7-9F5DE26C4E86}']
-    function GetAllowMultiple: Boolean;
-    procedure SetAllowMultiple(const aValue: Boolean);
-    function GetHasValue: Boolean;
-    procedure SetHasValue(const aValue: Boolean);
-    function GetHelpText: string;
-    procedure SetHelpText(const aValue: string);
-    function GetIsHidden: Boolean;
-    procedure SetIsHidden(const aValue: Boolean);
-    function GetIsAnonymous: Boolean;
-    function GetIsOptionFile: Boolean;
-    procedure SetIsOptionFile(const aValue: Boolean);
-    function GetLongName: string;
-    function GetRequired: Boolean;
-    procedure SetRequired(const aValue: Boolean);
-    function GetShortName: string;
-    function GetValueRequired: Boolean;
-    procedure SetValueRequired(const aValue: Boolean);
+    function get_AllowMultiple: Boolean;
+    procedure set_AllowMultiple(const aValue: Boolean);
+    function get_HasValue: Boolean;
+    procedure set_HasValue(const aValue: Boolean);
+    function get_HelpText: string;
+    procedure set_HelpText(const aValue: string);
+    function get_IsHidden: Boolean;
+    procedure set_IsHidden(const aValue: Boolean);
+    function get_IsAnonymous: Boolean;
+    function get_IsOptionFile: Boolean;
+    procedure set_IsOptionFile(const aValue: Boolean);
+    function get_LongName: string;
+    function get_Required: Boolean;
+    procedure set_Required(const aValue: Boolean);
+    function get_ShortName: string;
+    function get_ValueRequired: Boolean;
+    procedure set_ValueRequired(const aValue: Boolean);
     {Properties}
-    property AllowMultiple: Boolean read GetAllowMultiple write SetAllowMultiple;
-    property HasValue: Boolean read GetHasValue write SetHasValue;
-    property HelpText: string read GetHelpText write SetHelpText;
-    property Hidden: Boolean read GetIsHidden write SetIsHidden;
-    property IsAnonymous: Boolean read GetIsAnonymous;
-    property IsOptionFile: Boolean read GetIsOptionFile write SetIsOptionFile;
-    property LongName: string read GetLongName;
-    property Required: Boolean read GetRequired write SetRequired;
-    property ShortName: string read GetShortName;
-    property ValueRequired: Boolean read GetValueRequired write SetValueRequired;
+    property AllowMultiple: Boolean read get_AllowMultiple write set_AllowMultiple;
+    property HasValue: Boolean read get_HasValue write set_HasValue;
+    property HelpText: string read get_HelpText write set_HelpText;
+    property Hidden: Boolean read get_IsHidden write set_IsHidden;
+    property IsAnonymous: Boolean read get_IsAnonymous;
+    property IsOptionFile: Boolean read get_IsOptionFile write set_IsOptionFile;
+    property LongName: string read get_LongName;
+    property Required: Boolean read get_Required write set_Required;
+    property ShortName: string read get_ShortName;
+    property ValueRequired: Boolean read get_ValueRequired write set_ValueRequired;
   end;
 
   TEnumerateCommandOptionsAction = reference to procedure(const aOptionDefinition: IOptionDefinition);
@@ -53,25 +53,25 @@ type
     procedure GetAllRegisteredOptions(const aList: TList<IOptionDefinition>);
     function HasOption(const aOptionName: string): Boolean;
     function TryGetOption(const aName: string; var aOption: IOptionDefinition): Boolean;
-    function GetAlias: string;
-    function GetDescription: string;
-    function GetHelpText: string;
-    function GetIsDefault: Boolean;
-    function GetName: string;
-    function GetRegisteredAnonymousOptions: TList<IOptionDefinition>;
-    function GetRegisteredOptions: TList<IOptionDefinition>;
-    function GetUsage: string;
-    function GetVisible: Boolean;
+    function get_Alias: string;
+    function get_Description: string;
+    function get_HelpText: string;
+    function get_IsDefault: Boolean;
+    function get_Name: string;
+    function get_RegisteredAnonymousOptions: TList<IOptionDefinition>;
+    function get_RegisteredOptions: TList<IOptionDefinition>;
+    function get_Usage: string;
+    function get_Visible: Boolean;
     {Properties}
-    property Alias: string read GetAlias;
-    property Description: string read GetDescription;
-    property HelpText: string read GetHelpText;
-    property IsDefault: Boolean read GetIsDefault;
-    property Name: string read GetName;
-    property RegisteredAnonymousOptions: TList<IOptionDefinition> read GetRegisteredAnonymousOptions;
-    property RegisteredOptions: TList<IOptionDefinition> read GetRegisteredOptions;
-    property Usage: string read GetUsage;
-    property Visible: Boolean read GetVisible;
+    property Alias: string read get_Alias;
+    property Description: string read get_Description;
+    property HelpText: string read get_HelpText;
+    property IsDefault: Boolean read get_IsDefault;
+    property Name: string read get_Name;
+    property RegisteredAnonymousOptions: TList<IOptionDefinition> read get_RegisteredAnonymousOptions;
+    property RegisteredOptions: TList<IOptionDefinition> read get_RegisteredOptions;
+    property Usage: string read get_Usage;
+    property Visible: Boolean read get_Visible;
   end;
 
   TEnumerateCommandAction = reference to procedure(const aCommandDefinition: ICommandDefinition);
@@ -85,13 +85,13 @@ type
 
   ICmdlineParseResult = interface
     ['{1715B9FF-8A34-47C9-843E-619C5AEA3F32}']
-    function GetCommandName: string;
-    function GetErrorText: string;
-    function GetHasErrors: Boolean;
+    function get_CommandName: string;
+    function get_ErrorText: string;
+    function get_HasErrors: Boolean;
     {Properties}
-    property CommandName: string read GetCommandName;
-    property ErrorText: string read GetErrorText;
-    property HasErrors: Boolean read GetHasErrors;
+    property CommandName: string read get_CommandName;
+    property ErrorText: string read get_ErrorText;
+    property HasErrors: Boolean read get_HasErrors;
   end;
 
   ICmdlineParser = interface
@@ -104,9 +104,9 @@ type
     ['{9EADABED-511B-4095-9ACA-A5E431AB653D}']
     procedure AddError(const aErrStr: string);
     procedure SetCommand(const aCommand: ICommandDefinition);
-    function GetCommand: ICommandDefinition;
+    function get_Command: ICommandDefinition;
     {Properties}
-    property Command: ICommandDefinition read GetCommand;
+    property Command: ICommandDefinition read get_Command;
   end;
 
 implementation

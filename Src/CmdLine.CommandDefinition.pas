@@ -29,15 +29,15 @@ type
     FRegisteredOptions: TList<IOptionDefinition>;
     FUsage: string;
     FVisible: Boolean;
-    function GetAlias: string;
-    function GetDescription: string;
-    function GetHelpText: string;
-    function GetIsDefault: Boolean;
-    function GetName: string;
-    function GetRegisteredAnonymousOptions: TList<IOptionDefinition>;
-    function GetRegisteredOptions: TList<IOptionDefinition>;
-    function GetUsage: string;
-    function GetVisible: Boolean;
+    function get_Alias: string;
+    function get_Description: string;
+    function get_HelpText: string;
+    function get_IsDefault: Boolean;
+    function get_Name: string;
+    function get_RegisteredAnonymousOptions: TList<IOptionDefinition>;
+    function get_RegisteredOptions: TList<IOptionDefinition>;
+    function get_Usage: string;
+    function get_Visible: Boolean;
   protected
     procedure AddOption(const aOption: IOptionDefinition);
     procedure Clear;
@@ -50,15 +50,15 @@ type
     constructor CreateDefault(aVisible: Boolean);
     destructor Destroy; override;
     {Properties}
-    property Alias: string read GetAlias;
-    property Description: string read GetDescription;
-    property HelpText: string read GetHelpText;
-    property IsDefault: Boolean read GetIsDefault;
-    property Name: string read GetName;
-    property RegisteredAnonymousOptions: TList<IOptionDefinition> read GetRegisteredAnonymousOptions;
-    property RegisteredOptions: TList<IOptionDefinition> read GetRegisteredOptions;
-    property Usage: string read GetUsage;
-    property Visible: Boolean read GetVisible;
+    property Alias: string read get_Alias;
+    property Description: string read get_Description;
+    property HelpText: string read get_HelpText;
+    property IsDefault: Boolean read get_IsDefault;
+    property Name: string read get_Name;
+    property RegisteredAnonymousOptions: TList<IOptionDefinition> read get_RegisteredAnonymousOptions;
+    property RegisteredOptions: TList<IOptionDefinition> read get_RegisteredOptions;
+    property Usage: string read get_Usage;
+    property Visible: Boolean read get_Visible;
   end;
 
 implementation
@@ -159,53 +159,53 @@ begin
   end;
 end;
 
-function TCommandDefinition.GetAlias: string;
-begin
-  Result := FAlias;
-end;
-
 procedure TCommandDefinition.GetAllRegisteredOptions(const aList: TList<IOptionDefinition>);
 begin
   aList.AddRange(FAnonymousOptions);
   aList.AddRange(FRegisteredOptions);
 end;
 
-function TCommandDefinition.GetDescription: string;
+function TCommandDefinition.get_Alias: string;
+begin
+  Result := FAlias;
+end;
+
+function TCommandDefinition.get_Description: string;
 begin
   Result := FDescription;
 end;
 
-function TCommandDefinition.GetHelpText: string;
+function TCommandDefinition.get_HelpText: string;
 begin
   Result := FHelpText;
 end;
 
-function TCommandDefinition.GetIsDefault: Boolean;
+function TCommandDefinition.get_IsDefault: Boolean;
 begin
   Result := FIsDefault;
 end;
 
-function TCommandDefinition.GetName: string;
+function TCommandDefinition.get_Name: string;
 begin
   Result := FName;
 end;
 
-function TCommandDefinition.GetRegisteredAnonymousOptions: TList<IOptionDefinition>;
+function TCommandDefinition.get_RegisteredAnonymousOptions: TList<IOptionDefinition>;
 begin
   Result := FAnonymousOptions;
 end;
 
-function TCommandDefinition.GetRegisteredOptions: TList<IOptionDefinition>;
+function TCommandDefinition.get_RegisteredOptions: TList<IOptionDefinition>;
 begin
   Result := FRegisteredOptions;
 end;
 
-function TCommandDefinition.GetUsage: string;
+function TCommandDefinition.get_Usage: string;
 begin
   Result := FUsage;
 end;
 
-function TCommandDefinition.GetVisible: Boolean;
+function TCommandDefinition.get_Visible: Boolean;
 begin
   Result := FVisible;
 end;

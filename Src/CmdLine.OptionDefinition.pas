@@ -22,58 +22,50 @@ type
     FTypeInfo: PTypeInfo;
     FValueRequired: Boolean;
     FWasFound: Boolean;
-
     /// <summary>Convert loaded option value string to proper type.
     /// </summary>
     /// <returns> T
     /// </returns>
     /// <param name="aValueStr"> (string) </param>
     function OptionValueStrToType(const aValueStr: string): T;
-
-    function GetAllowMultiple: Boolean;
-    procedure SetAllowMultiple(const aValue: Boolean);
-    function GetHasValue: Boolean;
-    procedure SetHasValue(const aValue: Boolean);
-    function GetHelpText: string;
-    procedure SetHelpText(const aValue: string);
-    function GetIsHidden: Boolean;
-    procedure SetIsHidden(const aValue: Boolean);
-    function GetIsAnonymous: Boolean;
-    function GetIsOptionFile: Boolean;
-    procedure SetIsOptionFile(const aValue: Boolean);
-    function GetLongName: string;
-    function GetRequired: Boolean;
-    procedure SetRequired(const aValue: Boolean);
-    function GetShortName: string;
-    function GetValueRequired: Boolean;
-    procedure SetValueRequired(const aValue: Boolean);
+    function get_AllowMultiple: Boolean;
+    procedure set_AllowMultiple(const aValue: Boolean);
+    function get_HasValue: Boolean;
+    procedure set_HasValue(const aValue: Boolean);
+    function get_HelpText: string;
+    procedure set_HelpText(const aValue: string);
+    function get_IsHidden: Boolean;
+    procedure set_IsHidden(const aValue: Boolean);
+    function get_IsAnonymous: Boolean;
+    function get_IsOptionFile: Boolean;
+    procedure set_IsOptionFile(const aValue: Boolean);
+    function get_LongName: string;
+    function get_Required: Boolean;
+    procedure set_Required(const aValue: Boolean);
+    function get_ShortName: string;
+    function get_ValueRequired: Boolean;
+    procedure set_ValueRequired(const aValue: Boolean);
   protected
     function GetTypeInfo: PTypeInfo;
     procedure InitDefault;
     procedure Invoke(const aValueStr: string);
     function WasFound: Boolean;
   public
-    constructor Create(
-      const aLongName: string;
-      const aShortName: string;
-      const aHelpText: string;
-      const aProc: TOptionValueParsedAction<T>); overload;
-
-    constructor Create(
-      const aLongName: string;
-      const aShortName: string;
+    constructor Create(const aLongName: string; const aShortName: string;
+      const aHelpText: string; const aProc: TOptionValueParsedAction<T>); overload;
+    constructor Create(const aLongName: string; const aShortName: string;
       const aProc: TOptionValueParsedAction<T>); overload;
     {Properties}
-    property AllowMultiple: Boolean read GetAllowMultiple write SetAllowMultiple;
-    property HasValue: Boolean read GetHasValue write SetHasValue;
-    property HelpText: string read GetHelpText write SetHelpText;
-    property Hidden: Boolean read GetIsHidden write SetIsHidden;
-    property IsAnonymous: Boolean read GetIsAnonymous;
-    property IsOptionFile: Boolean read GetIsOptionFile write SetIsOptionFile;
-    property LongName: string read GetLongName;
-    property Required: Boolean read GetRequired write SetRequired;
-    property ShortName: string read GetShortName;
-    property ValueRequired: Boolean read GetValueRequired write SetValueRequired;
+    property AllowMultiple: Boolean read get_AllowMultiple write set_AllowMultiple;
+    property HasValue: Boolean read get_HasValue write set_HasValue;
+    property HelpText: string read get_HelpText write set_HelpText;
+    property Hidden: Boolean read get_IsHidden write set_IsHidden;
+    property IsAnonymous: Boolean read get_IsAnonymous;
+    property IsOptionFile: Boolean read get_IsOptionFile write set_IsOptionFile;
+    property LongName: string read get_LongName;
+    property Required: Boolean read get_Required write set_Required;
+    property ShortName: string read get_ShortName;
+    property ValueRequired: Boolean read get_ValueRequired write set_ValueRequired;
   end;
 
 implementation
@@ -85,16 +77,15 @@ uses
   CmdLine.Consts,
   CmdLine.Utils;
 
-constructor TOptionDefinition<T>.Create(const aLongName: string;
-  const aShortName: string; const aHelpText: string;
-  const aProc: TOptionValueParsedAction<T>);
+constructor TOptionDefinition<T>.Create(const aLongName: string; const aShortName:
+  string; const aHelpText: string; const aProc: TOptionValueParsedAction<T>);
 begin
   Self.Create(aLongName, aShortName, aProc);
   FHelpText := aHelpText;
 end;
 
-constructor TOptionDefinition<T>.Create(const aLongName: string;
-  const aShortName: string; const aProc: TOptionValueParsedAction<T>);
+constructor TOptionDefinition<T>.Create(const aLongName: string; const aShortName:
+  string; const aProc: TOptionValueParsedAction<T>);
 const
   allowedTypeKinds: set of TTypeKind = [tkInteger, tkEnumeration, tkFloat, tkString,
     tkSet, tkLString, tkWString, tkInt64, tkUString];
@@ -119,57 +110,57 @@ begin
   InitDefault;
 end;
 
-function TOptionDefinition<T>.GetAllowMultiple: Boolean;
-begin
-  Result := FAllowMultiple;
-end;
-
-function TOptionDefinition<T>.GetHasValue: Boolean;
-begin
-  Result := FHasValue;
-end;
-
-function TOptionDefinition<T>.GetHelpText: string;
-begin
-  Result := FHelpText;
-end;
-
-function TOptionDefinition<T>.GetIsAnonymous: Boolean;
-begin
-  Result := FLongName.IsEmpty;
-end;
-
-function TOptionDefinition<T>.GetIsHidden: Boolean;
-begin
-  Result := FHidden;
-end;
-
-function TOptionDefinition<T>.GetIsOptionFile: Boolean;
-begin
-  Result := FIsOptionFile;
-end;
-
-function TOptionDefinition<T>.GetLongName: string;
-begin
-  Result := FLongName;
-end;
-
-function TOptionDefinition<T>.GetRequired: Boolean;
-begin
-  Result := FRequired;
-end;
-
-function TOptionDefinition<T>.GetShortName: string;
-begin
-  Result := FShortName;
-end;
-
 function TOptionDefinition<T>.GetTypeInfo: PTypeInfo;
 begin
   Result := FTypeInfo;
 end;
 
-function TOptionDefinition<T>.GetValueRequired: Boolean;
+function TOptionDefinition<T>.get_AllowMultiple: Boolean;
+begin
+  Result := FAllowMultiple;
+end;
+
+function TOptionDefinition<T>.get_HasValue: Boolean;
+begin
+  Result := FHasValue;
+end;
+
+function TOptionDefinition<T>.get_HelpText: string;
+begin
+  Result := FHelpText;
+end;
+
+function TOptionDefinition<T>.get_IsAnonymous: Boolean;
+begin
+  Result := FLongName.IsEmpty;
+end;
+
+function TOptionDefinition<T>.get_IsHidden: Boolean;
+begin
+  Result := FHidden;
+end;
+
+function TOptionDefinition<T>.get_IsOptionFile: Boolean;
+begin
+  Result := FIsOptionFile;
+end;
+
+function TOptionDefinition<T>.get_LongName: string;
+begin
+  Result := FLongName;
+end;
+
+function TOptionDefinition<T>.get_Required: Boolean;
+begin
+  Result := FRequired;
+end;
+
+function TOptionDefinition<T>.get_ShortName: string;
+begin
+  Result := FShortName;
+end;
+
+function TOptionDefinition<T>.get_ValueRequired: Boolean;
 begin
   Result := FValueRequired;
 end;
@@ -256,38 +247,38 @@ begin
   Result := v.AsType<T>;
 end;
 
-procedure TOptionDefinition<T>.SetAllowMultiple(const aValue: Boolean);
+procedure TOptionDefinition<T>.set_AllowMultiple(const aValue: Boolean);
 begin
   FAllowMultiple := aValue;
 end;
 
-procedure TOptionDefinition<T>.SetHasValue(const aValue: Boolean);
+procedure TOptionDefinition<T>.set_HasValue(const aValue: Boolean);
 begin
   FHasValue := aValue;
   InitDefault;
 end;
 
-procedure TOptionDefinition<T>.SetHelpText(const aValue: string);
+procedure TOptionDefinition<T>.set_HelpText(const aValue: string);
 begin
   FHelpText := aValue;
 end;
 
-procedure TOptionDefinition<T>.SetIsHidden(const aValue: Boolean);
+procedure TOptionDefinition<T>.set_IsHidden(const aValue: Boolean);
 begin
   FHidden := aValue;
 end;
 
-procedure TOptionDefinition<T>.SetIsOptionFile(const aValue: Boolean);
+procedure TOptionDefinition<T>.set_IsOptionFile(const aValue: Boolean);
 begin
   FIsOptionFile := aValue;
 end;
 
-procedure TOptionDefinition<T>.SetRequired(const aValue: Boolean);
+procedure TOptionDefinition<T>.set_Required(const aValue: Boolean);
 begin
   FRequired := aValue;
 end;
 
-procedure TOptionDefinition<T>.SetValueRequired(const aValue: Boolean);
+procedure TOptionDefinition<T>.set_ValueRequired(const aValue: Boolean);
 begin
   FValueRequired := aValue;
 end;
