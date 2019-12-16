@@ -13,31 +13,26 @@ type
   TCommandDefinitionRecord = record
   private
     FCommandDef: ICommandDefinition;
-    function GetAlias: string;
-    function GetDescription: string;
-    function GetName: string;
-    function GetUsage: string;
+    function get_Alias: string;
+    function get_Description: string;
+    function get_Name: string;
+    function get_Usage: string;
   public
     constructor Create(const aCommandDef: ICommandDefinition);
-
     function HasOption(const aName: string): Boolean;
-
     function RegisterAnonymousOption<T>(const aHelpText: string;
       const aAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
-
     function RegisterOption<T>(const aLongName, aShortName, aHelpText: string;
       const aAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
-
     function RegisterOption<T>(const aLongName, aShortName: string;
       const aAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
-
     function RegisterOption<T>(const aLongName: string;
       const aAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
     {Properties}
-    property Alias: string read GetAlias;
-    property Description: string read GetDescription;
-    property Name: string read GetName;
-    property Usage: string read GetUsage;
+    property Alias: string read get_Alias;
+    property Description: string read get_Description;
+    property Name: string read get_Name;
+    property Usage: string read get_Usage;
   end;
 
   TOptionsRegistry = class
@@ -53,7 +48,7 @@ type
     {Class Constructor}
     class constructor Create;
     class destructor Destroy;
-    class function GetDefaultCommand: ICommandDefinition; static;
+    class function get_DefaultCommand: ICommandDefinition; static;
   public
     class procedure Clear;
 
@@ -100,7 +95,7 @@ type
     class function RegisterOption<T>(const aLongName: string;
       const aAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
     {Properties}
-    class property DefaultCommand: ICommandDefinition read GetDefaultCommand;
+    class property DefaultCommand: ICommandDefinition read get_DefaultCommand;
     class property DescriptionTabSize: Integer read FDescriptionTabSize write FDescriptionTabSize;
     class property NameValueSeparator: string read FNameValueSeparator write FNameValueSeparator;
     class property RegisteredCommands: TDictionary<string, ICommandDefinition> read FCommandDefs;
@@ -158,7 +153,7 @@ begin
   FCommandDefs.TryGetValue(aName.ToLower, Result);
 end;
 
-class function TOptionsRegistry.GetDefaultCommand: ICommandDefinition;
+class function TOptionsRegistry.get_DefaultCommand: ICommandDefinition;
 begin
   Result := TOptionsRegistry.FDefaultCommand.FCommandDef;
 end;
@@ -391,22 +386,22 @@ begin
   FCommandDef := aCommandDef;
 end;
 
-function TCommandDefinitionRecord.GetAlias: string;
+function TCommandDefinitionRecord.get_Alias: string;
 begin
   Result := FCommandDef.Alias;
 end;
 
-function TCommandDefinitionRecord.GetDescription: string;
+function TCommandDefinitionRecord.get_Description: string;
 begin
   Result := FCommandDef.Description;
 end;
 
-function TCommandDefinitionRecord.GetName: string;
+function TCommandDefinitionRecord.get_Name: string;
 begin
   Result := FCommandDef.Name;
 end;
 
-function TCommandDefinitionRecord.GetUsage: string;
+function TCommandDefinitionRecord.get_Usage: string;
 begin
   Result := FCommandDef.Usage;
 end;
