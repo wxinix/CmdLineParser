@@ -22,40 +22,33 @@ type
     FTypeInfo: PTypeInfo;
     FValueRequired: Boolean;
     FWasFound: Boolean;
-    /// <summary>Convert loaded option value string to proper type.
-    /// </summary>
-    /// <returns> T
-    /// </returns>
-    /// <param name="aValueStr"> (string) </param>
-    function OptionValueStrToType(const aValueStr: string): T;
+    function OptionValueToType(const AValue: string): T;
     function get_AllowMultiple: Boolean;
-    procedure set_AllowMultiple(const aValue: Boolean);
+    procedure set_AllowMultiple(const AValue: Boolean);
     function get_HasValue: Boolean;
-    procedure set_HasValue(const aValue: Boolean);
+    procedure set_HasValue(const AValue: Boolean);
     function get_HelpText: string;
-    procedure set_HelpText(const aValue: string);
+    procedure set_HelpText(const AValue: string);
     function get_IsHidden: Boolean;
-    procedure set_IsHidden(const aValue: Boolean);
+    procedure set_IsHidden(const AValue: Boolean);
     function get_IsAnonymous: Boolean;
     function get_IsOptionFile: Boolean;
-    procedure set_IsOptionFile(const aValue: Boolean);
+    procedure set_IsOptionFile(const AValue: Boolean);
     function get_LongName: string;
     function get_Required: Boolean;
-    procedure set_Required(const aValue: Boolean);
+    procedure set_Required(const AValue: Boolean);
     function get_ShortName: string;
     function get_ValueRequired: Boolean;
-    procedure set_ValueRequired(const aValue: Boolean);
+    procedure set_ValueRequired(const AValue: Boolean);
   protected
     function GetTypeInfo: PTypeInfo;
     procedure InitDefault;
     procedure Invoke(const aValueStr: string);
     function WasFound: Boolean;
   public
-    constructor Create(const aLongName: string; const aShortName: string;
-      const aHelpText: string; const aProc: TOptionValueParsedAction<T>); overload;
-    constructor Create(const aLongName: string; const aShortName: string;
-      const aProc: TOptionValueParsedAction<T>); overload;
-    {Properties}
+    constructor Create(const ALongName, AShortName, AHelpText: string; const AProc: TOptionValueParsedAction<T>); overload;
+    constructor Create(const ALongName, AShortName: string; const AProc: TOptionValueParsedAction<T>); overload;
+    { Properties }
     property AllowMultiple: Boolean read get_AllowMultiple write set_AllowMultiple;
     property HasValue: Boolean read get_HasValue write set_HasValue;
     property HelpText: string read get_HelpText write set_HelpText;
@@ -77,15 +70,13 @@ uses
   CmdLine.Consts,
   CmdLine.Utils;
 
-constructor TOptionDefinition<T>.Create(const aLongName: string; const aShortName:
-  string; const aHelpText: string; const aProc: TOptionValueParsedAction<T>);
+constructor TOptionDefinition<T>.Create(const ALongName, AShortName, AHelpText: string; const AProc: TOptionValueParsedAction<T>);
 begin
-  Self.Create(aLongName, aShortName, aProc);
-  FHelpText := aHelpText;
+  Self.Create(ALongName, AShortName, AProc);
+  FHelpText := AHelpText;
 end;
 
-constructor TOptionDefinition<T>.Create(const aLongName: string; const aShortName:
-  string; const aProc: TOptionValueParsedAction<T>);
+constructor TOptionDefinition<T>.Create(const ALongName, AShortName: string; const AProc: TOptionValueParsedAction<T>);
 const
   allowedTypeKinds: set of TTypeKind = [tkInteger, tkEnumeration, tkFloat, tkString,
     tkSet, tkLString, tkWString, tkInt64, tkUString];
@@ -95,16 +86,16 @@ begin
   if not (FTypeInfo.Kind in allowedTypeKinds) then
     raise Exception.Create(SInvalidOptType);
 
-  FLongName := aLongName;
-  FShortName := aShortName;
+  FLongName := ALongName;
+  FShortName := AShortName;
   FHasValue := True;
-  FProc := aProc;
+  FProc := AProc;
   // Explicitly initialize these boolean properties.
   FIsOptionFile := False;
   FRequired := False;
 
   FAllowMultiple := False; // Not used at all.
-  FHidden := False;        // Not used at all.
+  FHidden := False; // Not used at all.
   FValueRequired := False; // Not used, duplicate with FHasValue?
   // Initialize the default value.
   InitDefault;
@@ -167,7 +158,7 @@ end;
 
 procedure TOptionDefinition<T>.InitDefault;
 begin
-  FDefault := Default(T);
+  FDefault := Default (T);
 
   if not FHasValue and (FTypeInfo.Name = StrBoolean) then
     FDefault := TValue.FromVariant(True).AsType<T>;
@@ -188,11 +179,11 @@ begin
     Exit;
   end;
 
-  v := OptionValueStrToType(aValueStr);
+  v := OptionValueToType(aValueStr);
   FProc(v);
 end;
 
-function TOptionDefinition<T>.OptionValueStrToType(const aValueStr: string): T;
+function TOptionDefinition<T>.OptionValueToType(const AValue: string): T;
 var
   floatVal: Double;
   int64Val: Int64;
@@ -203,21 +194,21 @@ begin
   case FTypeInfo.Kind of
     tkInteger:
       begin
-        intVal := StrToInt(aValueStr);
+        intVal := StrToInt(AValue);
         v := TValue.From<Integer>(intVal);
       end;
     tkInt64:
       begin
-        int64Val := StrToInt64(aValueStr);
+        int64Val := StrToInt64(AValue);
         v := TValue.From<Int64>(int64Val);
       end;
     tkString, tkLString, tkWString, tkUString:
       begin
-        v := TValue.From<string>(aValueStr);
+        v := TValue.From<string>(AValue);
       end;
     tkSet:
       begin
-        intVal := StringToSet(FTypeInfo, aValueStr);
+        intVal := StringToSet(FTypeInfo, AValue);
         ptr := @intVal;
         v := TValue.From<T>(T(ptr^));
       end;
@@ -225,19 +216,19 @@ begin
       begin
         if FTypeInfo.Name = StrBoolean then
         begin
-          v := TValue.From<Boolean>(StringToBoolean(aValueStr));
+          v := TValue.From<Boolean>(StringToBoolean(AValue));
         end
         else
         begin
-          intVal := GetEnumValue(FTypeInfo, aValueStr);
+          intVal := GetEnumValue(FTypeInfo, AValue);
           if intVal < 0 then
-            raise Exception.Create(Format(SInvalidEnumValue, [aValueStr]));
+            raise Exception.Create(Format(SInvalidEnumValue, [AValue]));
           v := TValue.FromOrdinal(FTypeInfo, intVal);
         end;
       end;
     tkFloat:
       begin
-        floatVal := StrToFloat(aValueStr);
+        floatVal := StrToFloat(AValue);
         v := TValue.From<Double>(floatVal);
       end;
   else
@@ -247,40 +238,40 @@ begin
   Result := v.AsType<T>;
 end;
 
-procedure TOptionDefinition<T>.set_AllowMultiple(const aValue: Boolean);
+procedure TOptionDefinition<T>.set_AllowMultiple(const AValue: Boolean);
 begin
-  FAllowMultiple := aValue;
+  FAllowMultiple := AValue;
 end;
 
-procedure TOptionDefinition<T>.set_HasValue(const aValue: Boolean);
+procedure TOptionDefinition<T>.set_HasValue(const AValue: Boolean);
 begin
-  FHasValue := aValue;
+  FHasValue := AValue;
   InitDefault;
 end;
 
-procedure TOptionDefinition<T>.set_HelpText(const aValue: string);
+procedure TOptionDefinition<T>.set_HelpText(const AValue: string);
 begin
-  FHelpText := aValue;
+  FHelpText := AValue;
 end;
 
-procedure TOptionDefinition<T>.set_IsHidden(const aValue: Boolean);
+procedure TOptionDefinition<T>.set_IsHidden(const AValue: Boolean);
 begin
-  FHidden := aValue;
+  FHidden := AValue;
 end;
 
-procedure TOptionDefinition<T>.set_IsOptionFile(const aValue: Boolean);
+procedure TOptionDefinition<T>.set_IsOptionFile(const AValue: Boolean);
 begin
-  FIsOptionFile := aValue;
+  FIsOptionFile := AValue;
 end;
 
-procedure TOptionDefinition<T>.set_Required(const aValue: Boolean);
+procedure TOptionDefinition<T>.set_Required(const AValue: Boolean);
 begin
-  FRequired := aValue;
+  FRequired := AValue;
 end;
 
-procedure TOptionDefinition<T>.set_ValueRequired(const aValue: Boolean);
+procedure TOptionDefinition<T>.set_ValueRequired(const AValue: Boolean);
 begin
-  FValueRequired := aValue;
+  FValueRequired := AValue;
 end;
 
 function TOptionDefinition<T>.WasFound: Boolean;

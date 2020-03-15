@@ -8,42 +8,42 @@ function GetConsoleWidth: Integer;
 /// Split a given text into array of strings, each string not exceeding a
 /// maximum number of characters.
 /// </summary>
-/// <param name="aText">
+/// <param name="AText">
 /// The given text.
 /// </param>
-/// <param name="aMaxLen">
+/// <param name="AMaxLen">
 /// Maximum number of characters of each string.
 /// </param>
-function SplitText(const aText: string; const aMaxLen: Integer): TArray<string>;
+function SplitText(const AText: string; const AMaxLen: Integer): TArray<string>;
 
 /// <summary>
 /// Split a given string into array of strings; each string element not
 /// exceeding maximum number of characters.
 /// </summary>
-/// <param name="aLen">
+/// <param name="ALen">
 /// Length of the division.
 /// </param>
-/// <param name="aSrcStr">
+/// <param name="ASrcStr">
 /// Source string to be divided.
 /// </param>
-function SplitStringAt(const aLen: Integer; const aSrcStr: string): TArray<string>;
+function SplitStringAt(const ALen: Integer; const ASrcStr: string): TArray<string>;
 
 /// <summary>
 /// Convert a Boolean compatible string to Boolean type.
 /// </summary>
-/// <param name="aValue">
+/// <param name="AValue">
 /// A Boolean compatible string.
 /// </param>
-function StringToBoolean(const aValue: string): Boolean;
+function StringToBoolean(const AValue: string): Boolean;
 
 /// <summary>
 /// Strip quote char from the given string. Quote char include single quote
 /// or double quote.
 /// </summary>
-/// <param name="aString">
+/// <param name="AStr">
 /// A string to strip quote char at two ends.
 /// </param>
-procedure StripQuotes(var aString: string);
+procedure StripQuotes(var AStr: string);
 
 const
   TrueStrings: array [0 .. 10] of string = ('True', 'T', '+', 'Yes', 'Y', 'On',
@@ -60,19 +60,19 @@ uses
   System.StrUtils,
   System.SysUtils;
 
-function SplitStringAt(const aLen: Integer; const aSrcStr: string): TArray<string>;
+function SplitStringAt(const ALen: Integer; const ASrcStr: string): TArray<string>;
 var
   count: Integer;
   idx: Integer;
   srcLen: Integer;
 begin
   SetLength(Result, 0);
-  srcLen := Length(aSrcStr);
+  srcLen := Length(ASrcStr);
 
-  if srcLen < aLen then
+  if srcLen < ALen then
   begin
     SetLength(Result, 1);
-    Result[0] := aSrcStr;
+    Result[0] := ASrcStr;
     Exit;
   end;
 
@@ -83,12 +83,12 @@ begin
   begin
     Inc(count);
     SetLength(Result, count);
-    Result[count - 1] := Copy(aSrcStr, idx, aLen);
-    Inc(idx, aLen);
+    Result[count - 1] := Copy(ASrcStr, idx, ALen);
+    Inc(idx, ALen);
   end;
 end;
 
-function SplitText(const aText: string; const aMaxLen: Integer): TArray<string>;
+function SplitText(const AText: string; const AMaxLen: Integer): TArray<string>;
 var
   I, J, K: Integer;
   lineSplitStrs, strLines: TArray<string>;
@@ -97,7 +97,7 @@ begin
   SetLength(Result, 0);
 
   // Otherwise a CRLF will result in two lines.
-  text := StringReplace(aText, sLineBreak, #13, [rfReplaceAll]);
+  text := StringReplace(AText, sLineBreak, #13, [rfReplaceAll]);
 
   // Splits at each CR *and* each LF! Delimiters denotes set of single characters used to
   // split string. Each character in Delimiters string will be used as one of possible
@@ -108,7 +108,7 @@ begin
 
   for I := 0 to Length(strLines) - 1 do
   begin
-    lineSplitStrs := SplitStringAt(aMaxLen, strLines[I]);
+    lineSplitStrs := SplitStringAt(AMaxLen, strLines[I]);
 
     Inc(K, Length(lineSplitStrs));
     SetLength(Result, K);
@@ -143,35 +143,35 @@ begin
 end;
 {$ENDIF}
 
-function StringToBoolean(const aValue: string): Boolean;
+function StringToBoolean(const AValue: string): Boolean;
 const
   sInvalidBooleanStr = 'Invalid string, not Boolean compliant.';
 begin
-  if MatchText(aValue, TrueStrings) then
+  if MatchText(AValue, TrueStrings) then
     Result := True
   else
-    if MatchText(aValue, FalseStrings) then
+    if MatchText(AValue, FalseStrings) then
       Result := False
     else
       raise Exception.Create(sInvalidBooleanStr);
 end;
 
-procedure StripQuotes(var aString: string);
+procedure StripQuotes(var AStr: string);
 const
   minStrLen    = 2;
   quoteCharSet = ['''', '"'];
 var
   strLen: Integer;
 begin
-  strLen := Length(aString);
+  strLen := Length(AStr);
 
   if strLen < minStrLen then
     Exit;
 
-  if CharInSet(aString[1], quoteCharSet) and CharInSet(aString[strLen], quoteCharSet) then
+  if CharInSet(AStr[1], quoteCharSet) and CharInSet(AStr[strLen], quoteCharSet) then
   begin
-    Delete(aString, strLen, 1);
-    Delete(aString, 1, 1);
+    Delete(AStr, strLen, 1);
+    Delete(AStr, 1, 1);
   end;
 end;
 

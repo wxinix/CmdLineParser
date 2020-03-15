@@ -12,7 +12,7 @@ type
     FCommand: ICommandDefinition;
     FErrors: TStringList;
     procedure AddError(const aErrStr: string);
-    procedure SetCommand(const aCommand: ICommandDefinition);
+    procedure SetCommand(const ACmd: ICommandDefinition);
     function get_Command: ICommandDefinition;
     function get_CommandName: string;
     function get_ErrorText: string;
@@ -30,7 +30,7 @@ type
   ///  command that owns global options. There may also include one and only one
   ///  extra non-default command. After the non-default command is hit, all items
   ///  after it will be treated as its options. Anonymous options will be searched
-  ///  only within this non-defauld command's registered  anonymous options. Named
+  ///  only within this non-default command's registered  anonymous options. Named
   ///  options will be search within this non-default command, if not found, the
   ///  search will continue within the default command,i.e., global options.
   /// </summary>
@@ -45,29 +45,17 @@ type
     /// <returns> True, when the item has option token, False otherwise.
     /// </returns>
     /// <param name="aCmdLineStrItem"> (string) A command line string item. </param>
-    function HasOptionToken(var aCmdLineStrItem: string): Boolean;
+    function HasOptionToken(var ACmdLineStrItem: string): Boolean;
 
-    function InternalInvokeOption(aOption: IOptionDefinition; const aOptionName,
-      aOptionValue: string; aUseOptionNameAsValue: Boolean;
-      out aErrMsg: string): Boolean;
-
-    procedure InternalParse(const aCmdLineStrs: TStrings;
-      const aParseResult: IInternalParseResult);
-
-    procedure InternalParseFile(const aFileName: string;
-      const aParseResult: IInternalParseResult);
-
-    procedure InternalValidate(const aParseResult: IInternalParseResult);
-
-    function TryGetCommand(const aCmdName: string;
-      var aCmd: ICommandDefinition): Boolean;
-
-    function TryGetOption(const aCurCommand: ICommandDefinition;
-      const aDefaultCommand: ICommandDefinition; const aOptionName: string;
-      var aOption: IOptionDefinition): Boolean;
+    function InternalInvokeOption(AOption: IOptionDefinition; const AName, AValue: string; AUseNameAsValue: Boolean; out AErrMsg: string): Boolean;
+    procedure InternalParse(const ACmdLineStrs: TStrings; const AParseResult: IInternalParseResult);
+    procedure InternalParseFile(const AFileName: string; const AParseResult: IInternalParseResult);
+    procedure InternalValidate(const AParseResult: IInternalParseResult);
+    function TryGetCommand(const ACmdName: string; var ACmd: ICommandDefinition): Boolean;
+    function TryGetOption(const ACurCmd, ADefCmd: ICommandDefinition; const AOptionName: string; var AOption: IOptionDefinition): Boolean;
   protected
     function Parse: ICmdLineParseResult; overload;
-    function Parse(const aCmdLineStrs: TStrings): ICmdLineParseResult; overload;
+    function Parse(const ACmdLineStrs: TStrings): ICmdLineParseResult; overload;
   public
     constructor Create(const aNameValueSeparator: string);
     destructor Destroy; override;
@@ -96,7 +84,7 @@ begin
   inherited;
 end;
 
-function TCmdLineParser.HasOptionToken(var aCmdLineStrItem: string): Boolean;
+function TCmdLineParser.HasOptionToken(var ACmdLineStrItem: string): Boolean;
 var
   token: string;
 begin
@@ -104,32 +92,30 @@ begin
 
   for token in OptionTokens do
   begin
-    if StartsStr(token, aCmdLineStrItem) then
+    if StartsStr(token, ACmdLineStrItem) then
     begin
-      Delete(aCmdLineStrItem, 1, Length(token));
+      Delete(ACmdLineStrItem, 1, Length(token));
       Result := True;
       Break;
     end;
   end;
 end;
 
-function TCmdLineParser.InternalInvokeOption(aOption: IOptionDefinition; const
-  aOptionName: string; const aOptionValue: string; aUseOptionNameAsValue: Boolean;
-  out aErrMsg: string): Boolean;
+function TCmdLineParser.InternalInvokeOption(AOption: IOptionDefinition; const AName, AValue: string; AUseNameAsValue: Boolean; out AErrMsg: string): Boolean;
 begin
   Result := True;
-  aErrMsg := EmptyStr;
+  AErrMsg := EmptyStr;
 
   try
-    if aUseOptionNameAsValue then
-      (aOption as IOptionDefinitionInvoke).Invoke(aOptionName)
+    if AUseNameAsValue then
+      (AOption as IOptionDefinitionInvoke).Invoke(AName)
     else
-      (aOption as IOptionDefinitionInvoke).Invoke(aOptionValue);
+      (AOption as IOptionDefinitionInvoke).Invoke(AValue);
   except
     on E: Exception do
     begin
       Result := False;
-      aErrMsg := Format(SErrSettingOpt, [aOptionName, aOptionValue, E.Message]);
+      AErrMsg := Format(SErrSettingOpt, [AName, AValue, E.Message]);
     end;
   end;
 end;
@@ -140,8 +126,7 @@ end;
 // further within default command, we would need maintain two anonymous index, for
 // default and current command respective. That is uncessarily complicated. Hence we
 // don't do that.
-procedure TCmdLineParser.InternalParse(const aCmdLineStrs: TStrings;
-  const aParseResult: IInternalParseResult);
+procedure TCmdLineParser.InternalParse(const ACmdLineStrs: TStrings; const AParseResult: IInternalParseResult);
 var
   I, optionNameValueSeperatorPos: Integer;
   optionName, optionValue, cmdLineStrItem, errStr: string;
@@ -151,13 +136,13 @@ var
 begin
   curCommand := TOptionsRegistry.DefaultCommand;
 
-  for I := 0 to aCmdLineStrs.Count - 1 do
+  for I := 0 to ACmdLineStrs.Count - 1 do
   begin
     optionNameValueSeperatorPos := 0;
     option := nil;
     bSeekValue := True;
     bUseNameAsValue := False;
-    cmdLineStrItem := aCmdLineStrs.Strings[I];
+    cmdLineStrItem := ACmdLineStrs.Strings[I];
 
     if cmdLineStrItem.IsEmpty then //Possible, if inside quotes.
       Continue;
@@ -168,7 +153,7 @@ begin
       begin
         curCommand := newCommand;
         newCommand := nil;
-        aParseResult.SetCommand(curCommand); //Set only once, i.e. only one command is allowed.
+        AParseResult.SetCommand(curCommand); //Set only once, i.e. only one command is allowed.
         FAnonymousIndex := 0;
         Continue;
       end
@@ -182,8 +167,7 @@ begin
         end
         else
         begin
-          aParseResult.AddError(
-            Format(SUnknownAnonymousOpt, [aCmdLineStrs.Strings[I]]));
+          AParseResult.AddError(Format(SUnknownAnonymousOpt, [ACmdLineStrs.Strings[I]]));
           Continue;
         end;
     end;
@@ -194,8 +178,7 @@ begin
     if optionNameValueSeperatorPos > 0 then
     begin
       optionName := Copy(cmdLineStrItem, 1, optionNameValueSeperatorPos - 1);
-      optionValue := Copy(cmdLineStrItem, optionNameValueSeperatorPos +
-          Length(FNameValueSeparator), MaxInt);
+      optionValue := Copy(cmdLineStrItem, optionNameValueSeperatorPos + Length(FNameValueSeparator), MaxInt);
       StripQuotes(optionValue);
     end
     else
@@ -207,13 +190,13 @@ begin
     // if at this point, option is nil, then will try get it
     if not TryGetOption(curCommand, TOptionsRegistry.DefaultCommand, optionName, option) then
     begin
-      aParseResult.AddError(Format(SUnknownOpt, [optionName]));
+      AParseResult.AddError(Format(SUnknownOpt, [optionName]));
       Continue;
     end;
 
     if option.HasValue and optionValue.IsEmpty then
     begin
-      aParseResult.AddError(
+      AParseResult.AddError(
         Format(SOptValueMissing, [optionName, FNameValueSeparator]));
       Continue;
     end;
@@ -225,64 +208,67 @@ begin
 
       if not FileExists(optionValue) then
       begin
-        aParseResult.AddError(Format(SParamFileMissing, [optionValue]));
+        AParseResult.AddError(Format(SParamFileMissing, [optionValue]));
         Continue;
       end
       else
       begin
-        InternalParseFile(optionValue, aParseResult);
+        InternalParseFile(optionValue, AParseResult);
         Break; //Option file override all other options; and will stop the parsing.
       end;
     end;
 
     if not InternalInvokeOption(option, optionName, optionValue, bUseNameAsValue, errStr) then
-      aParseResult.AddError(errStr);
+      AParseResult.AddError(errStr);
   end;
 end;
 
-procedure TCmdLineParser.InternalParseFile(const aFileName: string;
-  const aParseResult: IInternalParseResult);
+procedure TCmdLineParser.InternalParseFile(const AFileName: string; const AParseResult: IInternalParseResult);
 var
   strList: TStringList;
 begin
   strList := TStringList.Create;
 
   try
-    strList.LoadFromFile(aFileName);
-    InternalParse(strList, aParseResult);
+    strList.LoadFromFile(AFileName);
+    InternalParse(strList, AParseResult);
   finally
     strList.Free;
   end;
 end;
 
-procedure TCmdLineParser.InternalValidate(const aParseResult: IInternalParseResult);
+procedure TCmdLineParser.InternalValidate(const AParseResult: IInternalParseResult);
 var
   option: IOptionDefinition;
 begin
-  for option in TOptionsRegistry.defaultCommand.RegisteredOptions do
+  for option in TOptionsRegistry.DefaultCommand.RegisteredOptions do
   begin
     if option.Required then
       if not (option as IOptionDefinitionInvoke).WasFound then
-        aParseResult.AddError(Format(SReqOptMissing, [option.LongName]));
+        AParseResult.AddError(Format(SReqOptMissing, [option.LongName]));
   end;
 
-  for option in TOptionsRegistry.defaultCommand.RegisteredAnonymousOptions do
+  for option in TOptionsRegistry.DefaultCommand.RegisteredAnonymousOptions do
   begin
     if option.Required then
+    begin
       if not (option as IOptionDefinitionInvoke).WasFound then
       begin
-        aParseResult.AddError(SReqAnonymousOptMissing);
+        AParseResult.AddError(SReqAnonymousOptMissing);
         Break;
       end;
+    end;
   end;
 
-  if Assigned(aParseResult.Command) then
+  if Assigned(AParseResult.Command) then
   begin
-    for option in aParseResult.Command.RegisteredOptions do
+    for option in AParseResult.Command.RegisteredOptions do
     begin
       if option.Required then
+      begin
         if not (option as IOptionDefinitionInvoke).WasFound then
-          aParseResult.AddError(Format(SReqOptMissing, [option.LongName]));
+          AParseResult.AddError(Format(SReqOptMissing, [option.LongName]));
+      end;
     end;
   end;
 end;
@@ -308,35 +294,31 @@ begin
   end;
 end;
 
-function TCmdLineParser.Parse(const aCmdLineStrs: TStrings): ICmdLineParseResult;
+function TCmdLineParser.Parse(const ACmdLineStrs: TStrings): ICmdLineParseResult;
 begin
   Result := TCmdLineParseResult.Create;
-  InternalParse(aCmdLineStrs, Result as IInternalParseResult);
+  InternalParse(ACmdLineStrs, Result as IInternalParseResult);
   InternalValidate(Result as IInternalParseResult);
 end;
 
-function TCmdLineParser.TryGetCommand(const aCmdName: string;
-  var aCmd: ICommandDefinition): Boolean;
+function TCmdLineParser.TryGetCommand(const ACmdName: string; var ACmd: ICommandDefinition): Boolean;
 begin
-  Result := TOptionsRegistry.RegisteredCommands.TryGetValue
-    (LowerCase(aCmdName), aCmd);
+  Result := TOptionsRegistry.RegisteredCommands.TryGetValue(LowerCase(ACmdName), ACmd);
 end;
 
-function TCmdLineParser.TryGetOption(const aCurCommand: ICommandDefinition; const
-  aDefaultCommand: ICommandDefinition; const aOptionName: string; var aOption:
-  IOptionDefinition): Boolean;
+function TCmdLineParser.TryGetOption(const ACurCmd: ICommandDefinition; const ADefCmd: ICommandDefinition; const AOptionName: string; var AOption: IOptionDefinition): Boolean;
 begin
-  if not Assigned(aOption) then
+  if not Assigned(AOption) then
   begin
-    if not aCurCommand.TryGetOption(LowerCase(aOptionName), aOption) then
+    if not ACurCmd.TryGetOption(LowerCase(AOptionName), AOption) then
     begin
-      if not aCurCommand.IsDefault then
+      if not ACurCmd.IsDefault then
         // Last resort to find an option.
-        aDefaultCommand.TryGetOption(LowerCase(aOptionName), aOption)
+        ADefCmd.TryGetOption(LowerCase(AOptionName), AOption)
     end;
   end;
 
-  Result := Assigned(aOption);
+  Result := Assigned(AOption);
 end;
 
 constructor TCmdLineParseResult.Create;
@@ -379,9 +361,9 @@ begin
   Result := FErrors.Count > 0;
 end;
 
-procedure TCmdLineParseResult.SetCommand(const aCommand: ICommandDefinition);
+procedure TCmdLineParseResult.SetCommand(const ACmd: ICommandDefinition);
 begin
-  FCommand := aCommand;
+  FCommand := ACmd;
 end;
 
 end.

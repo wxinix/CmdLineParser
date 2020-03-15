@@ -14,13 +14,10 @@ type
   [TestFixture]
   TCmdLineParserTests = class
   public
-{$REGION}
     [Setup]
     procedure Setup;
     [TearDown]
     procedure TearDown;
-{$ENDREGION}
-{$REGION 'Global Options Tests'}
     [Test]
     procedure Can_Parse_ColonEqualNameValueSeparator;
     [Test]
@@ -55,11 +52,8 @@ type
     procedure Will_Raise_On_Registering_Duplicate_Options;
     [Test]
     procedure Will_Raise_On_Registering_Anonymous_Option;
-{$ENDREGION}
-{$REGION 'Command Tests'}
     [Test]
     procedure Can_Parse_Command_Options;
-{$ENDREGION}
   end;
 
 implementation
@@ -291,8 +285,7 @@ var
   test: TExampleEnum;
   test1: Boolean;
 begin
-  cmd := TOptionsRegistry.RegisterCommand('test','t','Test Command',
-    'Test [Options]','Test Usage');
+  cmd := TOptionsRegistry.RegisterCommand('test','t','Test Command', 'Test [Options]','Test Usage');
 
   def := cmd.RegisterOption<TExampleEnum>('verbose', 'v',
     procedure(const value: TExampleEnum)
@@ -300,9 +293,9 @@ begin
       test := value;
     end);
 
-  // Global options that go with the default commdn.
+  // Global options that go with the default command.
   def := TOptionsRegistry.RegisterOption<Boolean>('autosave', 'as',
-     procedure(const value: Boolean)
+    procedure(const value: Boolean)
     begin
       test1 := value;
     end);
@@ -565,7 +558,7 @@ begin
     procedure
     begin
       TOptionsRegistry.RegisterOption<Boolean>('test', 't',
-          procedure(const value: Boolean)
+        procedure(const value: Boolean)
         begin
           Test := value;
         end);
@@ -585,7 +578,7 @@ begin
     procedure
     begin
       TOptionsRegistry.RegisterOption<Boolean>('', 't',
-          procedure(const value: Boolean)
+        procedure(const value: Boolean)
         begin
         end);
     end);

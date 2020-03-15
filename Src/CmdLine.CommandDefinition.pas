@@ -39,17 +39,17 @@ type
     function get_Usage: string;
     function get_Visible: Boolean;
   protected
-    procedure AddOption(const aOption: IOptionDefinition);
+    procedure AddOption(const AOption: IOptionDefinition);
     procedure Clear;
-    procedure EnumerateCommandOptions(const aProc: TEnumerateCommandOptionsAction);
-    procedure GetAllRegisteredOptions(const aList: TList<IOptionDefinition>);
-    function HasOption(const aOptionName: string): Boolean;
-    function TryGetOption(const aName: string; var aOption: IOptionDefinition): Boolean;
+    procedure EnumerateCommandOptions(const AProc: TEnumerateCommandOptionsAction);
+    procedure GetAllRegisteredOptions(const AResult: TList<IOptionDefinition>);
+    function HasOption(const AName: string): Boolean;
+    function TryGetOption(const AName: string; var AOption: IOptionDefinition): Boolean;
   public
-    constructor Create(const aParams: TCommandDefinitionCreateParams);
-    constructor CreateDefault(aVisible: Boolean);
+    constructor Create(const AParams: TCommandDefinitionCreateParams);
+    constructor CreateDefault(AVisible: Boolean);
     destructor Destroy; override;
-    {Properties}
+    { Properties }
     property Alias: string read get_Alias;
     property Description: string read get_Description;
     property HelpText: string read get_HelpText;
@@ -67,11 +67,11 @@ uses
   Generics.Defaults,
   System.SysUtils;
 
-constructor TCommandDefinition.Create(const aParams: TCommandDefinitionCreateParams);
+constructor TCommandDefinition.Create(const AParams: TCommandDefinitionCreateParams);
 begin
   inherited Create;
 
-  with aParams do
+  with AParams do
   begin
     FAlias := Alias;
     FDescription := Description;
@@ -87,7 +87,7 @@ begin
   FAnonymousOptions := TList<IOptionDefinition>.Create;
 end;
 
-constructor TCommandDefinition.CreateDefault(aVisible: Boolean);
+constructor TCommandDefinition.CreateDefault(AVisible: Boolean);
 var
   params: TCommandDefinitionCreateParams;
 begin
@@ -99,7 +99,7 @@ begin
     IsDefault := True; // Default is always True.
     Name := EmptyStr;
     Usage := EmptyStr;
-    Visible := aVisible;
+    Visible := AVisible;
   end;
 
   Create(params);
@@ -115,17 +115,19 @@ end;
 
 // Will be called only after HasOption is checked by TCommandDefintionRecord.
 // HasOption must return False before proceeding to AddOption.
-procedure TCommandDefinition.AddOption(const aOption: IOptionDefinition);
+procedure TCommandDefinition.AddOption(const AOption: IOptionDefinition);
 begin
-  if aOption.IsAnonymous then
-    FAnonymousOptions.Add(aOption)
+  if AOption.IsAnonymous then
+  begin
+    FAnonymousOptions.Add(AOption);
+  end
   else
   begin
-    FRegisteredOptions.Add(aOption);
-    FOptionsLookup.AddOrSetValue(LowerCase(aOption.LongName), aOption);
+    FRegisteredOptions.Add(AOption);
+    FOptionsLookup.AddOrSetValue(LowerCase(AOption.LongName), AOption);
 
-    if not aOption.ShortName.IsEmpty then
-      FOptionsLookup.AddOrSetValue(LowerCase(aOption.ShortName), aOption);
+    if not AOption.ShortName.IsEmpty then
+      FOptionsLookup.AddOrSetValue(LowerCase(AOption.ShortName), AOption);
   end;
 end;
 
@@ -136,7 +138,7 @@ begin
   FAnonymousOptions.Clear;
 end;
 
-procedure TCommandDefinition.EnumerateCommandOptions(const aProc: TEnumerateCommandOptionsAction);
+procedure TCommandDefinition.EnumerateCommandOptions(const AProc: TEnumerateCommandOptionsAction);
 var
   opt: IOptionDefinition;
   optionList: TList<IOptionDefinition>;
@@ -153,16 +155,16 @@ begin
       end));
 
     for opt in optionList do
-      aProc(opt);
+      AProc(opt);
   finally
     optionList.Free;
   end;
 end;
 
-procedure TCommandDefinition.GetAllRegisteredOptions(const aList: TList<IOptionDefinition>);
+procedure TCommandDefinition.GetAllRegisteredOptions(const AResult: TList<IOptionDefinition>);
 begin
-  aList.AddRange(FAnonymousOptions);
-  aList.AddRange(FRegisteredOptions);
+  AResult.AddRange(FAnonymousOptions);
+  AResult.AddRange(FRegisteredOptions);
 end;
 
 function TCommandDefinition.get_Alias: string;
@@ -210,15 +212,16 @@ begin
   Result := FVisible;
 end;
 
-function TCommandDefinition.HasOption(const aOptionName: string): Boolean;
+function TCommandDefinition.HasOption(const AName: string): Boolean;
 begin
-  Result := FOptionsLookup.ContainsKey(LowerCase(aOptionName));
+  Result := FOptionsLookup.ContainsKey(LowerCase(AName));
 end;
 
-function TCommandDefinition.TryGetOption(const aName: string; var aOption:
-  IOptionDefinition): Boolean;
+function TCommandDefinition.TryGetOption(
+const AName: string;
+var AOption: IOptionDefinition): Boolean;
 begin
-  Result := FOptionsLookup.TryGetValue(LowerCase(aName), aOption);
+  Result := FOptionsLookup.TryGetValue(LowerCase(AName), AOption);
 end;
 
 end.

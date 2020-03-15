@@ -30,7 +30,7 @@ type
     function get_ShortName: string;
     function get_ValueRequired: Boolean;
     procedure set_ValueRequired(const aValue: Boolean);
-    {Properties}
+    { Properties }
     property AllowMultiple: Boolean read get_AllowMultiple write set_AllowMultiple;
     property HasValue: Boolean read get_HasValue write set_HasValue;
     property HelpText: string read get_HelpText write set_HelpText;
@@ -49,10 +49,10 @@ type
     ['{58199FE2-19DF-4F9B-894F-BD1C5B62E0CB}']
     procedure AddOption(const aOption: IOptionDefinition);
     procedure Clear;
-    procedure EnumerateCommandOptions(const aProc: TEnumerateCommandOptionsAction); overload;
-    procedure GetAllRegisteredOptions(const aList: TList<IOptionDefinition>);
-    function HasOption(const aOptionName: string): Boolean;
-    function TryGetOption(const aName: string; var aOption: IOptionDefinition): Boolean;
+    procedure EnumerateCommandOptions(const AProc: TEnumerateCommandOptionsAction); overload;
+    procedure GetAllRegisteredOptions(const AResult: TList<IOptionDefinition>);
+    function HasOption(const AName: string): Boolean;
+    function TryGetOption(const AName: string; var aOption: IOptionDefinition): Boolean;
     function get_Alias: string;
     function get_Description: string;
     function get_HelpText: string;
@@ -62,7 +62,7 @@ type
     function get_RegisteredOptions: TList<IOptionDefinition>;
     function get_Usage: string;
     function get_Visible: Boolean;
-    {Properties}
+    { Properties }
     property Alias: string read get_Alias;
     property Description: string read get_Description;
     property HelpText: string read get_HelpText;
@@ -79,7 +79,7 @@ type
   IOptionDefinitionInvoke = interface
     ['{580B5B40-CD7B-41B8-AE53-2C6890141FF0}']
     function GetTypeInfo: PTypeInfo;
-    procedure Invoke(const aValueStr: string);
+    procedure Invoke(const AValue: string);
     function WasFound: Boolean;
   end;
 
@@ -88,7 +88,7 @@ type
     function get_CommandName: string;
     function get_ErrorText: string;
     function get_HasErrors: Boolean;
-    {Properties}
+    { Properties }
     property CommandName: string read get_CommandName;
     property ErrorText: string read get_ErrorText;
     property HasErrors: Boolean read get_HasErrors;
@@ -97,15 +97,15 @@ type
   ICmdlineParser = interface
     ['{6F970026-D1EE-4A3E-8A99-300AD3EE9C33}']
     function Parse: ICmdlineParseResult; overload;
-    function Parse(const aValues: TStrings): ICmdlineParseResult; overload;
+    function Parse(const AValues: TStrings): ICmdlineParseResult; overload;
   end;
 
   IInternalParseResult = interface
     ['{9EADABED-511B-4095-9ACA-A5E431AB653D}']
-    procedure AddError(const aErrStr: string);
-    procedure SetCommand(const aCommand: ICommandDefinition);
+    procedure AddError(const AError: string);
+    procedure SetCommand(const ACmd: ICommandDefinition);
     function get_Command: ICommandDefinition;
-    {Properties}
+    { Properties }
     property Command: ICommandDefinition read get_Command;
   end;
 

@@ -22,7 +22,7 @@ const
   StrBoolean              = 'Boolean';
   SUnknownCommand         = 'Unknown command: %s.';
   SUnknownOpt             = 'Unknown option: %s.';
-  SUnknownAnonymousOpt      = 'Unknown anonymous option: %s.';
+  SUnknownAnonymousOpt    = 'Unknown anonymous option: %s.';
   SUsage                  = 'usage: ';
 
   SOptNameMissing =
