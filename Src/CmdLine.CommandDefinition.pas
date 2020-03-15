@@ -1,3 +1,31 @@
+{***************************************************************************}
+{                                                                           }
+{           Command Line Parser                                             }
+{           Copyright (C) 2020 Wuping Xin                                   }
+{           KLD Engineering, P. C.                                          }
+{           http://www.kldcompanies.com                                     }
+{                                                                           }
+{           VSoft.CommandLine                                               }
+{           Copyright (C) 2014 Vincent Parrett                              }
+{           vincent@finalbuilder.com                                        }
+{           http://www.finalbuilder.com                                     }
+{                                                                           }
+{***************************************************************************}
+{                                                                           }
+{  Licensed under the Apache License, Version 2.0 (the "License");          }
+{  you may not use this file except in compliance with the License.         }
+{  You may obtain a copy of the License at                                  }
+{                                                                           }
+{      http://www.apache.org/licenses/LICENSE-2.0                           }
+{                                                                           }
+{  Unless required by applicable law or agreed to in writing, software      }
+{  distributed under the License is distributed on an "AS IS" BASIS,        }
+{  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. }
+{  See the License for the specific language governing permissions and      }
+{  limitations under the License.                                           }
+{                                                                           }
+{***************************************************************************}
+
 unit CmdLine.CommandDefinition;
 
 interface
@@ -10,7 +38,7 @@ type
   TCommandDefinitionCreateParams = record
     Alias: string;
     Description: string;
-    HelpText: string;
+    Help: string;
     IsDefault: Boolean;
     Name: string;
     Usage: string;
@@ -22,16 +50,16 @@ type
     FAlias: string;
     FAnonymousOptions: TList<IOptionDefinition>;
     FDescription: string;
-    FHelpText: string;
+    FHelp: string;
     FIsDefault: Boolean;
     FName: string;
-    FOptionsLookup: TDictionary<string, IOptionDefinition>;
+    FOptions: TDictionary<string, IOptionDefinition>;
     FRegisteredOptions: TList<IOptionDefinition>;
     FUsage: string;
     FVisible: Boolean;
     function get_Alias: string;
     function get_Description: string;
-    function get_HelpText: string;
+    function get_Help: string;
     function get_IsDefault: Boolean;
     function get_Name: string;
     function get_RegisteredAnonymousOptions: TList<IOptionDefinition>;
@@ -52,7 +80,7 @@ type
     { Properties }
     property Alias: string read get_Alias;
     property Description: string read get_Description;
-    property HelpText: string read get_HelpText;
+    property Help: string read get_Help;
     property IsDefault: Boolean read get_IsDefault;
     property Name: string read get_Name;
     property RegisteredAnonymousOptions: TList<IOptionDefinition> read get_RegisteredAnonymousOptions;
@@ -75,14 +103,14 @@ begin
   begin
     FAlias := Alias;
     FDescription := Description;
-    FHelpText := HelpText;
+    FHelp := Help;
     FIsDefault := IsDefault;
     FName := Name;
     FUsage := Usage;
     FVisible := Visible;
   end;
 
-  FOptionsLookup := TDictionary<string, IOptionDefinition>.Create;
+  FOptions := TDictionary<string, IOptionDefinition>.Create;
   FRegisteredOptions := TList<IOptionDefinition>.Create;
   FAnonymousOptions := TList<IOptionDefinition>.Create;
 end;
@@ -95,7 +123,7 @@ begin
   begin
     Alias := EmptyStr;
     Description := EmptyStr;
-    HelpText := EmptyStr;
+    Help := EmptyStr;
     IsDefault := True; // Default is always True.
     Name := EmptyStr;
     Usage := EmptyStr;
@@ -107,7 +135,7 @@ end;
 
 destructor TCommandDefinition.Destroy;
 begin
-  FOptionsLookup.Free;
+  FOptions.Free;
   FAnonymousOptions.Free;
   FRegisteredOptions.Free;
   inherited;
@@ -124,16 +152,16 @@ begin
   else
   begin
     FRegisteredOptions.Add(AOption);
-    FOptionsLookup.AddOrSetValue(LowerCase(AOption.LongName), AOption);
+    FOptions.AddOrSetValue(LowerCase(AOption.LongName), AOption);
 
     if not AOption.ShortName.IsEmpty then
-      FOptionsLookup.AddOrSetValue(LowerCase(AOption.ShortName), AOption);
+      FOptions.AddOrSetValue(LowerCase(AOption.ShortName), AOption);
   end;
 end;
 
 procedure TCommandDefinition.Clear;
 begin
-  FOptionsLookup.Clear;
+  FOptions.Clear;
   FRegisteredOptions.Clear;
   FAnonymousOptions.Clear;
 end;
@@ -177,9 +205,9 @@ begin
   Result := FDescription;
 end;
 
-function TCommandDefinition.get_HelpText: string;
+function TCommandDefinition.get_Help: string;
 begin
-  Result := FHelpText;
+  Result := FHelp;
 end;
 
 function TCommandDefinition.get_IsDefault: Boolean;
@@ -214,14 +242,12 @@ end;
 
 function TCommandDefinition.HasOption(const AName: string): Boolean;
 begin
-  Result := FOptionsLookup.ContainsKey(LowerCase(AName));
+  Result := FOptions.ContainsKey(LowerCase(AName));
 end;
 
-function TCommandDefinition.TryGetOption(
-const AName: string;
-var AOption: IOptionDefinition): Boolean;
+function TCommandDefinition.TryGetOption(const AName: string; var AOption: IOptionDefinition): Boolean;
 begin
-  Result := FOptionsLookup.TryGetValue(LowerCase(AName), AOption);
+  Result := FOptions.TryGetValue(LowerCase(AName), AOption);
 end;
 
 end.

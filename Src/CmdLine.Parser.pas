@@ -1,3 +1,31 @@
+{***************************************************************************}
+{                                                                           }
+{           Command Line Parser                                             }
+{           Copyright (C) 2020 Wuping Xin                                   }
+{           KLD Engineering, P. C.                                          }
+{           http://www.kldcompanies.com                                     }
+{                                                                           }
+{           VSoft.CommandLine                                               }
+{           Copyright (C) 2014 Vincent Parrett                              }
+{           vincent@finalbuilder.com                                        }
+{           http://www.finalbuilder.com                                     }
+{                                                                           }
+{***************************************************************************}
+{                                                                           }
+{  Licensed under the Apache License, Version 2.0 (the "License");          }
+{  you may not use this file except in compliance with the License.         }
+{  You may obtain a copy of the License at                                  }
+{                                                                           }
+{      http://www.apache.org/licenses/LICENSE-2.0                           }
+{                                                                           }
+{  Unless required by applicable law or agreed to in writing, software      }
+{  distributed under the License is distributed on an "AS IS" BASIS,        }
+{  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. }
+{  See the License for the specific language governing permissions and      }
+{  limitations under the License.                                           }
+{                                                                           }
+{***************************************************************************}
+
 unit CmdLine.Parser;
 
 interface
@@ -11,7 +39,7 @@ type
   private
     FCommand: ICommandDefinition;
     FErrors: TStringList;
-    procedure AddError(const aErrStr: string);
+    procedure AddError(const AError: string);
     procedure SetCommand(const ACmd: ICommandDefinition);
     function get_Command: ICommandDefinition;
     function get_CommandName: string;
@@ -45,17 +73,17 @@ type
     /// <returns> True, when the item has option token, False otherwise.
     /// </returns>
     /// <param name="aCmdLineStrItem"> (string) A command line string item. </param>
-    function HasOptionToken(var ACmdLineStrItem: string): Boolean;
+    function HasOptionToken(var ACmdLineItem: string): Boolean;
 
     function InternalInvokeOption(AOption: IOptionDefinition; const AName, AValue: string; AUseNameAsValue: Boolean; out AErrMsg: string): Boolean;
-    procedure InternalParse(const ACmdLineStrs: TStrings; const AParseResult: IInternalParseResult);
+    procedure InternalParse(const ACmdLine: TStrings; const AParseResult: IInternalParseResult);
     procedure InternalParseFile(const AFileName: string; const AParseResult: IInternalParseResult);
     procedure InternalValidate(const AParseResult: IInternalParseResult);
     function TryGetCommand(const ACmdName: string; var ACmd: ICommandDefinition): Boolean;
     function TryGetOption(const ACurCmd, ADefCmd: ICommandDefinition; const AOptionName: string; var AOption: IOptionDefinition): Boolean;
   protected
     function Parse: ICmdLineParseResult; overload;
-    function Parse(const ACmdLineStrs: TStrings): ICmdLineParseResult; overload;
+    function Parse(const ACmdLine: TStrings): ICmdLineParseResult; overload;
   public
     constructor Create(const aNameValueSeparator: string);
     destructor Destroy; override;
@@ -84,7 +112,7 @@ begin
   inherited;
 end;
 
-function TCmdLineParser.HasOptionToken(var ACmdLineStrItem: string): Boolean;
+function TCmdLineParser.HasOptionToken(var ACmdLineItem: string): Boolean;
 var
   token: string;
 begin
@@ -92,9 +120,9 @@ begin
 
   for token in OptionTokens do
   begin
-    if StartsStr(token, ACmdLineStrItem) then
+    if StartsStr(token, ACmdLineItem) then
     begin
-      Delete(ACmdLineStrItem, 1, Length(token));
+      Delete(ACmdLineItem, 1, Length(token));
       Result := True;
       Break;
     end;
@@ -126,7 +154,7 @@ end;
 // further within default command, we would need maintain two anonymous index, for
 // default and current command respective. That is uncessarily complicated. Hence we
 // don't do that.
-procedure TCmdLineParser.InternalParse(const ACmdLineStrs: TStrings; const AParseResult: IInternalParseResult);
+procedure TCmdLineParser.InternalParse(const ACmdLine: TStrings; const AParseResult: IInternalParseResult);
 var
   I, optionNameValueSeperatorPos: Integer;
   optionName, optionValue, cmdLineStrItem, errStr: string;
@@ -136,13 +164,13 @@ var
 begin
   curCommand := TOptionsRegistry.DefaultCommand;
 
-  for I := 0 to ACmdLineStrs.Count - 1 do
+  for I := 0 to ACmdLine.Count - 1 do
   begin
     optionNameValueSeperatorPos := 0;
     option := nil;
     bSeekValue := True;
     bUseNameAsValue := False;
-    cmdLineStrItem := ACmdLineStrs.Strings[I];
+    cmdLineStrItem := ACmdLine.Strings[I];
 
     if cmdLineStrItem.IsEmpty then //Possible, if inside quotes.
       Continue;
@@ -167,7 +195,7 @@ begin
         end
         else
         begin
-          AParseResult.AddError(Format(SUnknownAnonymousOpt, [ACmdLineStrs.Strings[I]]));
+          AParseResult.AddError(Format(SUnknownAnonymousOpt, [ACmdLine.Strings[I]]));
           Continue;
         end;
     end;
@@ -294,10 +322,10 @@ begin
   end;
 end;
 
-function TCmdLineParser.Parse(const ACmdLineStrs: TStrings): ICmdLineParseResult;
+function TCmdLineParser.Parse(const ACmdLine: TStrings): ICmdLineParseResult;
 begin
   Result := TCmdLineParseResult.Create;
-  InternalParse(ACmdLineStrs, Result as IInternalParseResult);
+  InternalParse(ACmdLine, Result as IInternalParseResult);
   InternalValidate(Result as IInternalParseResult);
 end;
 
@@ -333,9 +361,9 @@ begin
   inherited;
 end;
 
-procedure TCmdLineParseResult.AddError(const aErrStr: string);
+procedure TCmdLineParseResult.AddError(const AError: string);
 begin
-  FErrors.Add(aErrStr)
+  FErrors.Add(AError)
 end;
 
 function TCmdLineParseResult.get_Command: ICommandDefinition;

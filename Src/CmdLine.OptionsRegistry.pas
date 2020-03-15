@@ -1,3 +1,31 @@
+{***************************************************************************}
+{                                                                           }
+{           Command Line Parser                                             }
+{           Copyright (C) 2020 Wuping Xin                                   }
+{           KLD Engineering, P. C.                                          }
+{           http://www.kldcompanies.com                                     }
+{                                                                           }
+{           VSoft.CommandLine                                               }
+{           Copyright (C) 2014 Vincent Parrett                              }
+{           vincent@finalbuilder.com                                        }
+{           http://www.finalbuilder.com                                     }
+{                                                                           }
+{***************************************************************************}
+{                                                                           }
+{  Licensed under the Apache License, Version 2.0 (the "License");          }
+{  you may not use this file except in compliance with the License.         }
+{  You may obtain a copy of the License at                                  }
+{                                                                           }
+{      http://www.apache.org/licenses/LICENSE-2.0                           }
+{                                                                           }
+{  Unless required by applicable law or agreed to in writing, software      }
+{  distributed under the License is distributed on an "AS IS" BASIS,        }
+{  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. }
+{  See the License for the specific language governing permissions and      }
+{  limitations under the License.                                           }
+{                                                                           }
+{***************************************************************************}
+
 unit CmdLine.OptionsRegistry;
 
 interface
@@ -20,8 +48,8 @@ type
   public
     constructor Create(const ACmdDef: ICommandDefinition);
     function HasOption(const AName: string): Boolean;
-    function RegisterAnonymousOption<T>(const AHelpText: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
-    function RegisterOption<T>(const ALongName, AShortName, AHelpText: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
+    function RegisterAnonymousOption<T>(const AHelp: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
+    function RegisterOption<T>(const ALongName, AShortName, AHelp: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
     function RegisterOption<T>(const ALongName, AShortName: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
     function RegisterOption<T>(const ALongName: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
     { Properties }
@@ -49,11 +77,11 @@ type
     class function Parse: ICmdLineParseResult; overload;
     class function Parse(const ACmdLine: TStrings): ICmdLineParseResult; overload;
     class procedure PrintUsage(const ACmdName: string; const AProc: TPrintUsageAction); overload;
-    class procedure PrintUsage(const aCmd: ICommandDefinition; const AProc: TPrintUsageAction); overload;
+    class procedure PrintUsage(const ACmd: ICommandDefinition; const AProc: TPrintUsageAction); overload;
     class procedure PrintUsage(const AProc: TPrintUsageAction); overload;
-    class function RegisterAnonymousOption<T>(const AHelpText: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
-    class function RegisterCommand(const AName, AAlias, ADescription, AHelpStr, AUsage: string; const AVisible: Boolean = True): TCommandDefinitionRecord;
-    class function RegisterOption<T>(const ALongName, AShortName, AHelpText: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
+    class function RegisterAnonymousOption<T>(const AHelp: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
+    class function RegisterCommand(const AName, AAlias, ADescription, AHelp, AUsage: string; const AVisible: Boolean = True): TCommandDefinitionRecord;
+    class function RegisterOption<T>(const ALongName, AShortName, AHelp: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
     class function RegisterOption<T>(const ALongName, AShortName: string; AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
     class function RegisterOption<T>(const ALongName: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
     { Properties }
@@ -180,20 +208,20 @@ begin
   PrintUsage(cmd, AProc);
 end;
 
-class procedure TOptionsRegistry.PrintUsage(const aCmd: ICommandDefinition; const AProc: TPrintUsageAction);
+class procedure TOptionsRegistry.PrintUsage(const ACmd: ICommandDefinition; const AProc: TPrintUsageAction);
 var
   maxDescW: Integer;
 begin
-  if not aCmd.IsDefault then
+  if not ACmd.IsDefault then
   begin
-    AProc(SUsage + aCmd.Usage);
+    AProc(SUsage + ACmd.Usage);
     AProc('');
-    AProc(aCmd.Description);
+    AProc(ACmd.Description);
 
-    if aCmd.HelpText <> '' then
+    if ACmd.Help <> '' then
     begin
       AProc('');
-      AProc('   ' + aCmd.HelpText);
+      AProc('   ' + ACmd.Help);
     end;
 
     AProc('');
@@ -217,7 +245,7 @@ begin
 
   maxDescW := maxDescW - FDescriptionTabSize;
 
-  aCmd.EnumerateCommandOptions(
+  ACmd.EnumerateCommandOptions(
     procedure(const aOption: IOptionDefinition)
     var
       al: Integer;
@@ -287,12 +315,12 @@ begin
   PrintUsage(FDefaultCommand.FCommandDef, AProc);
 end;
 
-class function TOptionsRegistry.RegisterAnonymousOption<T>(const AHelpText: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition;
+class function TOptionsRegistry.RegisterAnonymousOption<T>(const AHelp: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition;
 begin
-  Result := FDefaultCommand.RegisterAnonymousOption<T>(AHelpText, AAction);
+  Result := FDefaultCommand.RegisterAnonymousOption<T>(AHelp, AAction);
 end;
 
-class function TOptionsRegistry.RegisterCommand(const AName, AAlias, ADescription, AHelpStr, AUsage: string; const AVisible: Boolean = True): TCommandDefinitionRecord;
+class function TOptionsRegistry.RegisterCommand(const AName, AAlias, ADescription, AHelp, AUsage: string; const AVisible: Boolean = True): TCommandDefinitionRecord;
 var
   cmdDef: ICommandDefinition;
   params: TCommandDefinitionCreateParams;
@@ -301,7 +329,7 @@ begin
   begin
     Alias := AAlias;
     Description := ADescription;
-    HelpText := AHelpStr;
+    Help := AHelp;
     IsDefault := False; // Always false.  Only one default command.
     Name := AName;
     Usage := AUsage;
@@ -313,10 +341,10 @@ begin
   FCommandDefs.Add(AName.ToLower, cmdDef);
 end;
 
-class function TOptionsRegistry.RegisterOption<T>(const ALongName, AShortName, AHelpText: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition;
+class function TOptionsRegistry.RegisterOption<T>(const ALongName, AShortName, AHelp: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition;
 begin
   Result := RegisterOption<T>(ALongName, AShortName, AAction);
-  Result.HelpText := AHelpText;
+  Result.HelpText := AHelp;
 end;
 
 class function TOptionsRegistry.RegisterOption<T>(const ALongName, AShortName: string; AAction: TOptionValueParsedAction<T>): IOptionDefinition;
@@ -360,17 +388,17 @@ begin
   Result := FCommandDef.HasOption(AName);
 end;
 
-function TCommandDefinitionRecord.RegisterAnonymousOption<T>(const AHelpText: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition;
+function TCommandDefinitionRecord.RegisterAnonymousOption<T>(const AHelp: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition;
 begin
-  Result := TOptionDefinition<T>.Create('', '', AHelpText, AAction);
+  Result := TOptionDefinition<T>.Create('', '', AHelp, AAction);
   Result.HasValue := False;
   FCommandDef.AddOption(Result);
 end;
 
-function TCommandDefinitionRecord.RegisterOption<T>(const ALongName, AShortName, AHelpText: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition;
+function TCommandDefinitionRecord.RegisterOption<T>(const ALongName, AShortName, AHelp: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition;
 begin
   Result := RegisterOption<T>(ALongName, AShortName, AAction);
-  Result.HelpText := AHelpText;
+  Result.HelpText := AHelp;
 end;
 
 function TCommandDefinitionRecord.RegisterOption<T>(const ALongName, AShortName: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition;

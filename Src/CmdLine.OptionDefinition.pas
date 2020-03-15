@@ -1,3 +1,31 @@
+{***************************************************************************}
+{                                                                           }
+{           Command Line Parser                                             }
+{           Copyright (C) 2020 Wuping Xin                                   }
+{           KLD Engineering, P. C.                                          }
+{           http://www.kldcompanies.com                                     }
+{                                                                           }
+{           VSoft.CommandLine                                               }
+{           Copyright (C) 2014 Vincent Parrett                              }
+{           vincent@finalbuilder.com                                        }
+{           http://www.finalbuilder.com                                     }
+{                                                                           }
+{***************************************************************************}
+{                                                                           }
+{  Licensed under the Apache License, Version 2.0 (the "License");          }
+{  you may not use this file except in compliance with the License.         }
+{  You may obtain a copy of the License at                                  }
+{                                                                           }
+{      http://www.apache.org/licenses/LICENSE-2.0                           }
+{                                                                           }
+{  Unless required by applicable law or agreed to in writing, software      }
+{  distributed under the License is distributed on an "AS IS" BASIS,        }
+{  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. }
+{  See the License for the specific language governing permissions and      }
+{  limitations under the License.                                           }
+{                                                                           }
+{***************************************************************************}
+
 unit CmdLine.OptionDefinition;
 
 interface
@@ -46,7 +74,7 @@ type
     procedure Invoke(const aValueStr: string);
     function WasFound: Boolean;
   public
-    constructor Create(const ALongName, AShortName, AHelpText: string; const AProc: TOptionValueParsedAction<T>); overload;
+    constructor Create(const ALongName, AShortName, AHelp: string; const AProc: TOptionValueParsedAction<T>); overload;
     constructor Create(const ALongName, AShortName: string; const AProc: TOptionValueParsedAction<T>); overload;
     { Properties }
     property AllowMultiple: Boolean read get_AllowMultiple write set_AllowMultiple;
@@ -70,10 +98,10 @@ uses
   CmdLine.Consts,
   CmdLine.Utils;
 
-constructor TOptionDefinition<T>.Create(const ALongName, AShortName, AHelpText: string; const AProc: TOptionValueParsedAction<T>);
+constructor TOptionDefinition<T>.Create(const ALongName, AShortName, AHelp: string; const AProc: TOptionValueParsedAction<T>);
 begin
   Self.Create(ALongName, AShortName, AProc);
-  FHelpText := AHelpText;
+  FHelpText := AHelp;
 end;
 
 constructor TOptionDefinition<T>.Create(const ALongName, AShortName: string; const AProc: TOptionValueParsedAction<T>);
