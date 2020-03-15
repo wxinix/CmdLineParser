@@ -1054,6 +1054,11 @@
                 <Platform value="Win64">True</Platform>
             </Platforms>
             <ModelSupport>False</ModelSupport>
+            <MMX>
+                <UsesClauseFormatter AutoFormat="0">
+                    <GroupNames>WinApi;System.Win;System;Data;Vcl</GroupNames>
+                </UsesClauseFormatter>
+            </MMX>
         </BorlandProject>
         <ProjectFileVersion>12</ProjectFileVersion>
     </ProjectExtensions>

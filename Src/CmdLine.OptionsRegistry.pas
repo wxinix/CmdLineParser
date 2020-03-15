@@ -18,7 +18,7 @@ type
     function get_Name: string;
     function get_Usage: string;
   public
-    constructor Create(const aCmdDef: ICommandDefinition);
+    constructor Create(const ACmdDef: ICommandDefinition);
     function HasOption(const AName: string): Boolean;
     function RegisterAnonymousOption<T>(const AHelpText: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
     function RegisterOption<T>(const ALongName, AShortName, AHelpText: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
@@ -38,8 +38,6 @@ type
     class var FDefaultCommand: TCommandDefinitionRecord;
     class var FDescriptionTabSize: Integer;
     class var FNameValueSeparator: string;
-  private
-    { Class Constructor }
     class constructor Create;
     class destructor Destroy;
     class function get_DefaultCommand: ICommandDefinition; static;
@@ -53,8 +51,8 @@ type
     class procedure PrintUsage(const ACmdName: string; const AProc: TPrintUsageAction); overload;
     class procedure PrintUsage(const aCmd: ICommandDefinition; const AProc: TPrintUsageAction); overload;
     class procedure PrintUsage(const AProc: TPrintUsageAction); overload;
-    class function RegisterCommand(const AName, AAlias, ADescription, AHelpStr, AUsage: string; const AVisible: Boolean = True): TCommandDefinitionRecord;
     class function RegisterAnonymousOption<T>(const AHelpText: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
+    class function RegisterCommand(const AName, AAlias, ADescription, AHelpStr, AUsage: string; const AVisible: Boolean = True): TCommandDefinitionRecord;
     class function RegisterOption<T>(const ALongName, AShortName, AHelpText: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
     class function RegisterOption<T>(const ALongName, AShortName: string; AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
     class function RegisterOption<T>(const ALongName: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
@@ -110,6 +108,33 @@ begin
   cmd.EnumerateCommandOptions(AProc);
 end;
 
+class procedure TOptionsRegistry.EnumerateCommands(const AProc: TEnumerateCommandAction);
+var
+  cmd: ICommandDefinition;
+  cmdList: TList<ICommandDefinition>;
+begin
+  // The commandDefs are stored in a dictionary, so we need to sort them ourselves.
+  cmdList := TList<ICommandDefinition>.Create;
+  try
+    for cmd in FCommandDefs.Values do
+    begin
+      if cmd.Visible then
+        cmdList.Add(cmd);
+    end;
+
+    cmdList.Sort(TComparer<ICommandDefinition>.Construct(
+      function(const L, R: ICommandDefinition): Integer
+      begin
+        Result := CompareText(L.Name, R.Name);
+      end));
+
+    for cmd in cmdList do
+      AProc(cmd);
+  finally
+    cmdList.Free;
+  end;
+end;
+
 class function TOptionsRegistry.GetCommandByName(const AName: string): ICommandDefinition;
 begin
   Result := nil;
@@ -123,18 +148,18 @@ end;
 
 class function TOptionsRegistry.Parse: ICmdLineParseResult;
 var
-  Parser: ICmdLineParser;
+  parser: ICmdLineParser;
 begin
-  Parser := TCmdLineParser.Create(NameValueSeparator);
-  Result := Parser.Parse;
+  parser := TCmdLineParser.Create(NameValueSeparator);
+  Result := parser.Parse;
 end;
 
 class function TOptionsRegistry.Parse(const ACmdLine: TStrings): ICmdLineParseResult;
 var
-  Parser: ICmdLineParser;
+  parser: ICmdLineParser;
 begin
-  Parser := TCmdLineParser.Create(NameValueSeparator);
-  Result := Parser.Parse(ACmdLine);
+  parser := TCmdLineParser.Create(NameValueSeparator);
+  Result := parser.Parse(ACmdLine);
 end;
 
 class procedure TOptionsRegistry.PrintUsage(const ACmdName: string; const AProc: TPrintUsageAction);
@@ -153,6 +178,75 @@ begin
     Exit;
   end;
   PrintUsage(cmd, AProc);
+end;
+
+class procedure TOptionsRegistry.PrintUsage(const aCmd: ICommandDefinition; const AProc: TPrintUsageAction);
+var
+  maxDescW: Integer;
+begin
+  if not aCmd.IsDefault then
+  begin
+    AProc(SUsage + aCmd.Usage);
+    AProc('');
+    AProc(aCmd.Description);
+
+    if aCmd.HelpText <> '' then
+    begin
+      AProc('');
+      AProc('   ' + aCmd.HelpText);
+    end;
+
+    AProc('');
+    AProc(SOptions);
+    AProc('');
+  end
+  else
+  begin
+    AProc('');
+    if FCommandDefs.Count > 0 then
+      AProc(SGlobalOptText)
+    else
+      AProc(SOptions);
+    AProc('');
+  end;
+
+  if FConsoleWidth < High(Integer) then
+    maxDescW := FConsoleWidth
+  else
+    maxDescW := High(Integer);
+
+  maxDescW := maxDescW - FDescriptionTabSize;
+
+  aCmd.EnumerateCommandOptions(
+    procedure(const aOption: IOptionDefinition)
+    var
+      al: Integer;
+      descStrings: TArray<string>;
+      I: Integer;
+      numDescStrings: Integer;
+      s: string;
+    begin
+      descStrings := SplitText(aOption.HelpText, maxDescW);
+      al := Length(aOption.ShortName);
+
+      if al <> 0 then
+        Inc(al, ShortNameExtraSpaceSize); // add brackets (- ) and 2 spaces;
+
+      s := ' -' + aOption.LongName.PadRight(DescriptionTabSize - 1 - al);
+
+      if al > 0 then
+        s := s + '(-' + aOption.ShortName + ')' + '  ';
+
+      s := s + descStrings[0];
+      AProc(s);
+      numDescStrings := Length(descStrings);
+      if numDescStrings > 1 then
+      begin
+        for I := 1 to numDescStrings - 1 do
+          AProc(''.PadRight(DescriptionTabSize + 1) + descStrings[I]);
+      end;
+    end
+  );
 end;
 
 class procedure TOptionsRegistry.PrintUsage(const AProc: TPrintUsageAction);
@@ -235,106 +329,10 @@ begin
   Result := RegisterOption<T>(ALongName, '', AAction);
 end;
 
-class procedure TOptionsRegistry.EnumerateCommands(const AProc: TEnumerateCommandAction);
-var
-  cmd: ICommandDefinition;
-  cmdList: TList<ICommandDefinition>;
-begin
-  // The commandDefs are stored in a dictionary, so we need to sort them ourselves.
-  cmdList := TList<ICommandDefinition>.Create;
-  try
-    for cmd in FCommandDefs.Values do
-    begin
-      if cmd.Visible then
-        cmdList.Add(cmd);
-    end;
-
-    cmdList.Sort(TComparer<ICommandDefinition>.Construct(
-      function(const L, R: ICommandDefinition): Integer
-      begin
-        Result := CompareText(L.Name, R.Name);
-      end));
-
-    for cmd in cmdList do
-      AProc(cmd);
-  finally
-    cmdList.Free;
-  end;
-end;
-
-class procedure TOptionsRegistry.PrintUsage(const aCmd: ICommandDefinition; const AProc: TPrintUsageAction);
-var
-  maxDescW: Integer;
-begin
-  if not aCmd.IsDefault then
-  begin
-    AProc(SUsage + aCmd.Usage);
-    AProc('');
-    AProc(aCmd.Description);
-
-    if aCmd.HelpText <> '' then
-    begin
-      AProc('');
-      AProc('   ' + aCmd.HelpText);
-    end;
-
-    AProc('');
-    AProc(SOptions);
-    AProc('');
-  end
-  else
-  begin
-    AProc('');
-    if FCommandDefs.Count > 0 then
-      AProc(SGlobalOptText)
-    else
-      AProc(SOptions);
-    AProc('');
-  end;
-
-  if FConsoleWidth < High(Integer) then
-    maxDescW := FConsoleWidth
-  else
-    maxDescW := High(Integer);
-
-  maxDescW := maxDescW - FDescriptionTabSize;
-
-  aCmd.EnumerateCommandOptions(
-    procedure(const aOption: IOptionDefinition)
-    var
-      al: Integer;
-      descStrings: TArray<string>;
-      I: Integer;
-      numDescStrings: Integer;
-      s: string;
-    begin
-      descStrings := SplitText(aOption.HelpText, maxDescW);
-      al := Length(aOption.ShortName);
-
-      if al <> 0 then
-        Inc(al, ShortNameExtraSpaceSize); // add brackets (- ) and 2 spaces;
-
-      s := ' -' + aOption.LongName.PadRight(DescriptionTabSize - 1 - al);
-
-      if al > 0 then
-        s := s + '(-' + aOption.ShortName + ')' + '  ';
-
-      s := s + descStrings[0];
-      AProc(s);
-      numDescStrings := Length(descStrings);
-      if numDescStrings > 1 then
-      begin
-        for I := 1 to numDescStrings - 1 do
-          AProc(''.PadRight(DescriptionTabSize + 1) + descStrings[I]);
-      end;
-    end
-  );
-end;
-
 { TCommandDef }
-constructor TCommandDefinitionRecord.Create(const aCmdDef: ICommandDefinition);
+constructor TCommandDefinitionRecord.Create(const ACmdDef: ICommandDefinition);
 begin
-  FCommandDef := aCmdDef;
+  FCommandDef := ACmdDef;
 end;
 
 function TCommandDefinitionRecord.get_Alias: string;
