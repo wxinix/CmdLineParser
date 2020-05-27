@@ -41,17 +41,17 @@ type
     FErrors: TStringList;
     procedure AddError(const AError: string);
     procedure SetCommand(const ACmd: ICommandDefinition);
-    function get_Command: ICommandDefinition;
-    function get_CommandName: string;
-    function get_ErrorText: string;
-    function get_HasErrors: Boolean;
+    function Get_Command: ICommandDefinition;
+    function Get_CommandName: string;
+    function Get_ErrorText: string;
+    function Get_HasErrors: Boolean;
   public
     constructor Create;
     destructor Destroy; override;
-    property Command: ICommandDefinition read get_Command;
-    property CommandName: string read get_CommandName;
-    property ErrorText: string read get_ErrorText;
-    property HasErrors: Boolean read get_HasErrors;
+    property Command: ICommandDefinition read Get_Command;
+    property CommandName: string read Get_CommandName;
+    property ErrorText: string read Get_ErrorText;
+    property HasErrors: Boolean read Get_HasErrors;
   end;
 
   /// <summary>Parse the command line. The command line always has a default
@@ -366,12 +366,12 @@ begin
   FErrors.Add(AError)
 end;
 
-function TCmdLineParseResult.get_Command: ICommandDefinition;
+function TCmdLineParseResult.Get_Command: ICommandDefinition;
 begin
   Result := FCommand;
 end;
 
-function TCmdLineParseResult.get_CommandName: string;
+function TCmdLineParseResult.Get_CommandName: string;
 begin
   if Assigned(FCommand) then
     Result := FCommand.Name
@@ -379,12 +379,12 @@ begin
     Result := EmptyStr;
 end;
 
-function TCmdLineParseResult.get_ErrorText: string;
+function TCmdLineParseResult.Get_ErrorText: string;
 begin
   Result := FErrors.Text;
 end;
 
-function TCmdLineParseResult.get_HasErrors: Boolean;
+function TCmdLineParseResult.Get_HasErrors: Boolean;
 begin
   Result := FErrors.Count > 0;
 end;

@@ -117,32 +117,28 @@ begin
 end;
 
 function SplitText(const AText: string; const AMaxLen: Integer): TArray<string>;
-var
-  I, J, K: Integer;
-  lineSplitStrs, strLines: TArray<string>;
-  text: string;
 begin
   SetLength(Result, 0);
 
   // Otherwise a CRLF will result in two lines.
-  text := StringReplace(AText, sLineBreak, #13, [rfReplaceAll]);
+  var text := StringReplace(AText, sLineBreak, #13, [rfReplaceAll]);
 
   // Splits at each CR *and* each LF! Delimiters denotes set of single characters used to
   // split string. Each character in Delimiters string will be used as one of possible
   // delimiters.
-  strLines := SplitString(text, #13#10);
+  var lines := SplitString(text, #13#10);
 
-  K := 0;
+  var K := 0;
 
-  for I := 0 to Length(strLines) - 1 do
+  for var I := 0 to Length(lines) - 1 do
   begin
-    lineSplitStrs := SplitStringAt(AMaxLen, strLines[I]);
+    var strs := SplitStringAt(AMaxLen, lines[I]);
 
-    Inc(K, Length(lineSplitStrs));
+    Inc(K, Length(strs));
     SetLength(Result, K);
 
-    for J := 0 to Length(lineSplitStrs) - 1 do
-      Result[K - Length(lineSplitStrs) + J] := lineSplitStrs[J];
+    for var J := 0 to Length(strs) - 1 do
+      Result[K - Length(strs) + J] := strs[J];
   end;
 end;
 
