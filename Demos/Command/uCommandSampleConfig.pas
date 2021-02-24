@@ -4,55 +4,50 @@ interface
 
 implementation
 
-
 uses
-  CmdLine.Intf, CmdLine.OptionsRegistry, uCommandSampleOptions;
+  CmdLine.OptionsRegistry, uCommandSampleOptions;
 
 procedure ConfigureOptions;
 var
-  cmd    : TCommandDefinitionRecord;
-  option : IOptionDefinition;
+  LHelpCommand, LInstallCommand: TCommandDefinitionHelper;
+  LOption: IOptionDefinition;
 begin
-  option := TOptionsRegistry.RegisterOption<boolean>('verbose','v','verbose output',
-    procedure(const value : boolean)
+  LOption := TOptionsRegistry.RegisterOption<boolean>('verbose','v','verbose output',
+    procedure(const aValue: Boolean)
     begin
-        TGlobalOptions.Verbose := value;
+      TGlobalOptions.Verbose := aValue;
     end);
-  option.HasValue := false;
+  LOption.RequiresValue := False;
 
-  option := TOptionsRegistry.RegisterOption<string>('outputpath','out','The path to the exe to output',
-                  procedure(const value : string)
-                  begin
-                      TGlobalOptions.OutPath := value;
-                  end);
+  LOption := TOptionsRegistry.RegisterOption<string>('outputpath','out','The path to the exe to output',
+    procedure(const aValue: string)
+    begin
+      TGlobalOptions.OutPath := aValue;
+    end);
+  LOption.Required := False;
 
-  option.Required := False;
+  LHelpCommand := TOptionsRegistry.RegisterCommand('help','h','get some help','','commandsample help [command]');
+  LHelpCommand.RegisterAnonymousOption<string>('The command you need help for',
+    procedure(const aValue: string)
+    begin
+      THelpOptions.HelpCommand := aValue;
+    end);
 
+  LInstallCommand := TOptionsRegistry.RegisterCommand('install','','install something', '', 'commandsample install [options]');
+  LOption := LInstallCommand.RegisterOption<string>('installpath','i','The path to the exe to install',
+    procedure(const aValue: string)
+    begin
+      TInstallOptions.InstallPath := aValue;
+    end);
+  LOption.Required := true;
 
-  cmd := TOptionsRegistry.RegisterCommand('help','h','get some help','','commandsample help [command]');
-  option := cmd.RegisterAnonymousOption<string>('The command you need help for',
-                  procedure(const value : string)
-                  begin
-                      THelpOptions.HelpCommand := value;
-                  end);
-
-  cmd := TOptionsRegistry.RegisterCommand('install','','install something', '', 'commandsample install [options]');
-  option := cmd.RegisterOption<string>('installpath','i','The path to the exe to install',
-                  procedure(const value : string)
-                  begin
-                      TInstallOptions.InstallPath := value;
-                  end);
-  option.Required := true;
-
-  option := cmd.RegisterOption<string>('outputpath','out','The path to the exe to output',
-                  procedure(const value : string)
-                  begin
-                      TInstallOptions.OutPath := value;
-                  end);
-  option.Required := False;
+  LOption := LInstallCommand.RegisterOption<string>('outputpath','out','The path to the exe to output',
+    procedure(const aValue: string)
+    begin
+      TInstallOptions.OutPath := aValue;
+    end);
+  LOption.Required := False;
 end;
-
-
 
 initialization
   ConfigureOptions;

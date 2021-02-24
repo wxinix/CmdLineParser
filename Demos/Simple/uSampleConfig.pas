@@ -1,29 +1,3 @@
-{ *************************************************************************** }
-{ }
-{ VSoft.CommandLine }
-{ }
-{ Copyright (C) 2014 Vincent Parrett }
-{ }
-{ vincent@finalbuilder.com }
-{ http://www.finalbuilder.com }
-{ }
-{ }
-{ *************************************************************************** }
-{ }
-{ Licensed under the Apache License, Version 2.0 (the "License"); }
-{ you may not use this file except in compliance with the License. }
-{ You may obtain a copy of the License at }
-{ }
-{ http://www.apache.org/licenses/LICENSE-2.0 }
-{ }
-{ Unless required by applicable law or agreed to in writing, software }
-{ distributed under the License is distributed on an "AS IS" BASIS, }
-{ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. }
-{ See the License for the specific language governing permissions and }
-{ limitations under the License. }
-{ }
-{ *************************************************************************** }
-
 unit uSampleConfig;
 
 interface
@@ -31,41 +5,35 @@ interface
 implementation
 
 uses
-  CmdLine.OptionsRegistry,
-  CmdLine.Intf,
-  uSampleOptions;
+  CmdLine.OptionsRegistry, uSampleOptions;
 
 procedure ConfigureOptions;
 var
-  option: IOptionDefinition;
+  LOption: IOptionDefinition;
 begin
-  option := TOptionsRegistry.RegisterOption<string>('inputfile', 'i',
-    'The file to be processed' + sLineBreak + 'if you dare!',
-      procedure(const value: string)
+  LOption := TOptionsRegistry.RegisterOption<string>('inputfile', 'i', 'The file to be processed' + sLineBreak + 'if you dare!',
+    procedure(const aValue: string)
     begin
-      TSampleOptions.InputFile := value;
+      TSampleOptions.InputFile := aValue;
     end);
-  option.Required := true;
+  LOption.Required := True;
 
-  option := TOptionsRegistry.RegisterOption<string>('outputfile', 'out',
-    'The processed output file',
-    procedure(const value: string)
+  LOption := TOptionsRegistry.RegisterOption<string>('outputfile', 'out', 'The processed output file',
+    procedure(const aValue: string)
     begin
-      TSampleOptions.OutputFile := value;
+      TSampleOptions.OutputFile := aValue;
     end);
-  option.Required := true;
+  LOption.Required := True;
 
-  option := TOptionsRegistry.RegisterOption<boolean>('mangle', 'm',
-    'Mangle the file!',
-    procedure(const value: boolean)
+  LOption := TOptionsRegistry.RegisterOption<Boolean>('mangle', 'm', 'Mangle the file!',
+    procedure(const aValue: Boolean)
     begin
-      TSampleOptions.MangleFile := value;
+      TSampleOptions.MangleFile := aValue;
     end);
-  option.HasValue := False;
+  LOption.RequiresValue := False;
 
-  option := TOptionsRegistry.RegisterOption<boolean>('options', '',
-    'Options file', nil);
-  option.IsOptionFile := true;
+  LOption := TOptionsRegistry.RegisterOption<Boolean>('options', '', 'Options file', nil);
+  LOption.IsOptionFile := True;  // Not required, default is false.
 end;
 
 initialization

@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{E17630B3-C733-4ABF-A256-0426AFD56248}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="CmdlineParser.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\..\Tests\CmdlineParserTests.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="CmdlineParser">
+        <MSBuild Projects="CmdlineParser.dproj"/>
+    </Target>
+    <Target Name="CmdlineParser:Clean">
+        <MSBuild Projects="CmdlineParser.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="CmdlineParser:Make">
+        <MSBuild Projects="CmdlineParser.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="CmdlineParserTests">
+        <MSBuild Projects="..\..\Tests\CmdlineParserTests.dproj"/>
+    </Target>
+    <Target Name="CmdlineParserTests:Clean">
+        <MSBuild Projects="..\..\Tests\CmdlineParserTests.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="CmdlineParserTests:Make">
+        <MSBuild Projects="..\..\Tests\CmdlineParserTests.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="CmdlineParser;CmdlineParserTests"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="CmdlineParser:Clean;CmdlineParserTests:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="CmdlineParser:Make;CmdlineParserTests:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

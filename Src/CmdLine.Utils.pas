@@ -1,11 +1,9 @@
 {***************************************************************************}
 {                                                                           }
 {           Command Line Parser                                             }
-{           Copyright (C) 2020 Wuping Xin                                   }
-{           KLD Engineering, P. C.                                          }
-{           http://www.kldcompanies.com                                     }
+{           Copyright (C) 2019-2021 Wuping Xin                              }
 {                                                                           }
-{           VSoft.CommandLine                                               }
+{           Based on VSoft.CommandLine                                      }
 {           Copyright (C) 2014 Vincent Parrett                              }
 {           vincent@finalbuilder.com                                        }
 {           http://www.finalbuilder.com                                     }
@@ -26,7 +24,7 @@
 {                                                                           }
 {***************************************************************************}
 
-unit CmdLine.Utils;
+unit Cmdline.Utils;
 
 interface
 
@@ -89,30 +87,24 @@ uses
   System.SysUtils;
 
 function SplitStringAt(const ALen: Integer; const ASrcStr: string): TArray<string>;
-var
-  count: Integer;
-  idx: Integer;
-  srcLen: Integer;
 begin
   SetLength(Result, 0);
-  srcLen := Length(ASrcStr);
+  var LSrcLen := Length(ASrcStr);
 
-  if srcLen < ALen then
-  begin
+  if LSrcLen < ALen then begin
     SetLength(Result, 1);
     Result[0] := ASrcStr;
     Exit;
   end;
 
-  idx := 1;
-  count := 0;
+  var LIndex := 1;
+  var LCount := 0;
 
-  while idx <= srcLen do
-  begin
-    Inc(count);
-    SetLength(Result, count);
-    Result[count - 1] := Copy(ASrcStr, idx, ALen);
-    Inc(idx, ALen);
+  while LIndex <= LSrcLen do begin
+    Inc(LCount);
+    SetLength(Result, LCount);
+    Result[LCount - 1] := Copy(ASrcStr, LIndex, ALen);
+    Inc(LIndex, ALen);
   end;
 end;
 
@@ -121,48 +113,46 @@ begin
   SetLength(Result, 0);
 
   // Otherwise a CRLF will result in two lines.
-  var text := StringReplace(AText, sLineBreak, #13, [rfReplaceAll]);
+  var LText := StringReplace(AText, sLineBreak, #13, [rfReplaceAll]);
 
   // Splits at each CR *and* each LF! Delimiters denotes set of single characters used to
   // split string. Each character in Delimiters string will be used as one of possible
   // delimiters.
-  var lines := SplitString(text, #13#10);
-
+  var LLines := SplitString(LText, #13#10);
   var K := 0;
 
-  for var I := 0 to Length(lines) - 1 do
-  begin
-    var strs := SplitStringAt(AMaxLen, lines[I]);
+  for var I := 0 to Length(LLines) - 1 do begin
+    var LStrs := SplitStringAt(AMaxLen, LLines[I]);
 
-    Inc(K, Length(strs));
+    Inc(K, Length(LStrs));
     SetLength(Result, K);
 
-    for var J := 0 to Length(strs) - 1 do
-      Result[K - Length(strs) + J] := strs[J];
+    for var J := 0 to Length(LStrs) - 1 do
+      Result[K - Length(LStrs) + J] := LStrs[J];
   end;
 end;
 
 {$IFDEF MSWINDOWS}
 function GetConsoleWidth: Integer;
 var
-  hStdOut: THandle;
-  info: CONSOLE_SCREEN_BUFFER_INFO;
+  LStdOutputHandle: THandle;
+  LConcoleScreenInfo: CONSOLE_SCREEN_BUFFER_INFO;
 begin
   // Default is unlimited width
   Result := High(Integer);
-  hStdOut := GetStdHandle(STD_OUTPUT_HANDLE);
+  LStdOutputHandle := GetStdHandle(STD_OUTPUT_HANDLE);
 
-  if GetConsoleScreenBufferInfo(hStdOut, info) then
-    Result := info.dwSize.X;
+  if GetConsoleScreenBufferInfo(LStdOutputHandle, LConcoleScreenInfo) then
+    Result := LConcoleScreenInfo.dwSize.X;
 end;
 {$ENDIF}
 
 {$IFDEF MACOS}
 function GetConsoleWidth: Integer;
 const
-  defaultWidth = 80;
+  kDefaultWidth = 80;
 begin
-  Result := defaultWidth;
+  Result := kDefaultWidth;
   // TODO : Find a way to get the console width on osx
 end;
 {$ENDIF}
@@ -182,19 +172,17 @@ end;
 
 procedure StripQuotes(var AStr: string);
 const
-  minStrLen    = 2;
-  quoteCharSet = ['''', '"'];
-var
-  strLen: Integer;
+  kMinStrLen    = 2;
+  kQuoteCharSet = ['''', '"'];
 begin
-  strLen := Length(AStr);
+  var LStrLen := Length(AStr);
 
-  if strLen < minStrLen then
+  if LStrLen < kMinStrLen then
     Exit;
 
-  if CharInSet(AStr[1], quoteCharSet) and CharInSet(AStr[strLen], quoteCharSet) then
+  if CharInSet(AStr[1], kQuoteCharSet) and CharInSet(AStr[LStrLen], kQuoteCharSet) then
   begin
-    Delete(AStr, strLen, 1);
+    Delete(AStr, LStrLen, 1);
     Delete(AStr, 1, 1);
   end;
 end;
