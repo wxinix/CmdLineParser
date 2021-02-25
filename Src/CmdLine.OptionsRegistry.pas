@@ -270,13 +270,12 @@ const
     = 'Unknown anonymous option: %s.';
   SUsage
     = 'usage: ';
-  SOptionNameMissing =
-    'Option name required - use RegisterAnonymousOption for unnamed options.';
-  SInvalidOptionType =
-    'Invalid option type: only string, integer, float, boolean, enum and ' +
-    'set types are supported.';
-  SOptionValueMissing =
-    'Option [%s] expects a <value> following %s, but none was found.';
+  SOptionNameMissing
+    = 'Option name required - use RegisterAnonymousOption for unnamed options.';
+  SInvalidOptionType
+    = 'Invalid option type: only string, integer, float, boolean, enum and set types are supported.';
+  SOptionValueMissing
+    = 'Option [%s] expects a <value> following %s, but none was found.';
 
 implementation
 
