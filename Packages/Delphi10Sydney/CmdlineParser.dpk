@@ -33,7 +33,6 @@ requires
   rtl;
 
 contains
-  CmdLine.OptionsRegistry in '..\..\Src\CmdLine.OptionsRegistry.pas',
-  CmdLine.Utils in '..\..\Src\CmdLine.Utils.pas';
+  CmdlineParser in '..\..\Src\CmdlineParser.pas';
 
 end.

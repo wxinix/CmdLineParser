@@ -30,7 +30,7 @@ unit CmdLineParserTests.TestObject;
 interface
 
 uses
-  DUnitX.TestFramework, CmdLine.OptionsRegistry;
+  DUnitX.TestFramework, CmdLineParser;
 
 type
   TExampleEnum = (enOne, enTwo, enThree);
@@ -502,7 +502,7 @@ begin
     procedure
     begin
       TOptionsRegistry.RegisterOption<Boolean>('test', 't',
-          procedure(const aValue: Boolean)
+        procedure(const aValue: Boolean)
         begin
           LTestBool := aValue;
         end);
