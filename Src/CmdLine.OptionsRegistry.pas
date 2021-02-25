@@ -42,6 +42,7 @@ type
     function Get_IsOptionFile: Boolean;
     procedure Set_IsOptionFile(const AValue: Boolean);
     function Get_LongName: string;
+    function Get_Name: string;
     function Get_Required: Boolean;
     procedure Set_Required(const AValue: Boolean);
     function Get_RequiresValue: Boolean;
@@ -52,6 +53,7 @@ type
     property IsAnonymous: Boolean read Get_IsAnonymous;
     property IsOptionFile: Boolean read Get_IsOptionFile write Set_IsOptionFile;
     property LongName: string read Get_LongName;
+    property Name: string read Get_Name;
     property Required: Boolean read Get_Required write Set_Required;
     property RequiresValue: Boolean read Get_RequiresValue write Set_RequiresValue;
     property ShortName: string read Get_ShortName;
@@ -64,8 +66,7 @@ type
     function WasFound: Boolean;
   end;
 
-  TOptionValueParsedAction<T>
-    = reference to procedure(const AValue: T);
+  TOptionValueParsedAction<T> = reference to procedure(const AValue: T);
 
   TOptionDefinition<T> = class(TInterfacedObject, IOptionDefinition, IOptionDefinitionInvoke)
   strict private
@@ -86,6 +87,7 @@ type
     function Get_IsOptionFile: Boolean;
     procedure Set_IsOptionFile(const AValue: Boolean);
     function Get_LongName: string;
+    function Get_Name: string;
     function Get_Required: Boolean;
     procedure Set_Required(const AValue: Boolean);
     function Get_RequiresValue: Boolean;
@@ -100,24 +102,21 @@ type
     procedure Invoke(const AValueStr: string);
     function WasFound: Boolean;
   public
-    constructor Create(const ALongName, AShortName, AHelp: string;
-      const AProc: TOptionValueParsedAction<T>); overload;
-
-    constructor Create(const ALongName, AShortName: string;
-      const AProc: TOptionValueParsedAction<T>); overload;
+    constructor Create(const ALongName, AShortName, AHelp: string; const AProc: TOptionValueParsedAction<T>); overload;
+    constructor Create(const ALongName, AShortName: string; const AProc: TOptionValueParsedAction<T>); overload;
     { Properties }
     property HelpText: string read Get_HelpText write Set_HelpText;
     property IsAnonymous: Boolean read Get_IsAnonymous;
     property IsOptionFile: Boolean read Get_IsOptionFile write Set_IsOptionFile;
     property LongName: string read Get_LongName;
+    property Name:string read Get_Name;
     property Required: Boolean read Get_Required write Set_Required;
     property RequiresValue: Boolean read Get_RequiresValue write Set_RequiresValue;
     property ShortName: string read Get_ShortName;
   end;
 
 type
-  TEnumerateCommandOptionsAction
-    = reference to procedure(const AOption: IOptionDefinition);
+  TEnumerateCommandOptionsAction = reference to procedure(const AOption: IOptionDefinition);
 
   ICommandDefinition = interface
     ['{58199FE2-19DF-4F9B-894F-BD1C5B62E0CB}']
@@ -150,8 +149,7 @@ type
     property Visible: Boolean read Get_Visible;
   end;
 
-  TEnumerateCommandAction
-    = reference to procedure(const ACommand: ICommandDefinition);
+  TEnumerateCommandAction = reference to procedure(const ACommand: ICommandDefinition);
 
   ICmdlineParseResult = interface
     ['{1715B9FF-8A34-47C9-843E-619C5AEA3F32}']
@@ -167,8 +165,8 @@ type
   end;
 
   /// <summary>
-  ///   Provides an adapter class for ICommandDefinition. Using a record here
-  ///   because Delphi does not support generic methods of an interface .
+  ///   Provides an adapter class for ICommandDefinition. Using a record here because Delphi does not
+  ///   support generic methods of an interface .
   /// </summary>
   TCommandDefinitionHelper = record
   strict private
@@ -181,21 +179,12 @@ type
     {$ENDREGION}
   public
     constructor Create(const ACommand: ICommandDefinition);
+    function HasOption(const AOptionName: string): Boolean;
 
-    function HasOption(const AName: string): Boolean;
-
-    function RegisterAnonymousOption<T>(const AHelp: string;
-      const AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
-
-    function RegisterOption<T>(const ALongName, AShortName, AHelp: string;
-      const AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
-
-    function RegisterOption<T>(const ALongName, AShortName: string;
-      const AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
-
-    function RegisterOption<T>(const ALongName: string;
-      const AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
-
+    function RegisterAnonymousOption<T>(const AHelp: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
+    function RegisterOption<T>(const ALongName, AShortName, AHelp: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
+    function RegisterOption<T>(const ALongName, AShortName: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
+    function RegisterOption<T>(const ALongName: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
     { Properties }
     property Alias: string read Get_Alias;
     property Command: ICommandDefinition read FCommand;
@@ -205,73 +194,8 @@ type
   end;
 
 type
-  TPrintUsageAction
-    = reference to procedure(const AText: string);
+  TPrintUsageAction = reference to procedure(const AText: string);
 
-  /// <summary>
-  ///   Manages command line options registration and parsing. <br />
-  /// </summary>
-  /// <remarks>
-  ///   <para>
-  ///     The command line string should start with global options (named or
-  ///     unnamed), then a named command, followed by the named command's
-  ///     options (named or unnamed). Multiple named commands can be
-  ///     registered, but only one can show up in the command line. Note, all
-  ///     command line arguments are separated by a space, but if the
-  ///     argument itself has a space then use double quotes or single
-  ///     quotes.
-  ///   </para>
-  ///   <list type="bullet">
-  ///     <item>
-  ///       Default name value separator is colon, i.e., ':'.
-  ///     </item>
-  ///     <item>
-  ///       A command line option can be prefixed by one of the four option
-  ///       token, e.g., --, -, /, and @. For example: --autosave:true,
-  ///       autosave is the option's name, true is its value.
-  ///     </item>
-  ///     <item>
-  ///       Command should not be prefixed by the token.
-  ///     </item>
-  ///     <item>
-  ///       Global anonymous options must appear before any named command
-  ///       in the command line.
-  ///     </item>
-  ///     <item>
-  ///       An invisible command owns global options. This command is the
-  ///       default command, and has no name.
-  ///     </item>
-  ///     <item>
-  ///       Once the parser encounters a named command (new command), all
-  ///       items after it will be treated as its options. Anonymous
-  ///       options will be searched only within the encountered command's
-  ///       registered anonymous options. Named options will be searched
-  ///       first within the encountered command's named options, and if
-  ///       nothing found, the search will continue global options.
-  ///     </item>
-  ///     <item>
-  ///       Anonymous options must appear in the same order when
-  ///       registered. They can be mixed with named options, but the
-  ///       appearing order of all anonymous options must be in the same
-  ///       order as they are registered.
-  ///     </item>
-  ///     <item>
-  ///       Anonymous option is always required.
-  ///     </item>
-  ///   </list>
-  ///   <para>
-  ///     To register a command, use the following fluent interface:
-  ///   </para>
-  ///   <code lang="Delphi">TOptionRegistry
-  /// .RegisterCommand(
-  ///   'test', 't', 'test command', 'help'
-  /// ).RegisterOption&lt;Boolean&gt;(
-  /// 'autosave', 'as',
-  /// procedure(const value: Boolean)
-  /// begin
-  ///   test1 := value;
-  /// end);</code>
-  /// </remarks>
   TOptionsRegistry = class
   strict private class var
     FCommands: TDictionary<string, ICommandDefinition>;
@@ -287,8 +211,7 @@ type
     {$ENDREGION}
   public
     class procedure Clear;
-    class procedure EmumerateCommandOptions(const ACommandName: string;
-      const AProc: TEnumerateCommandOptionsAction); overload;
+    class procedure EmumerateCommandOptions(const ACommandName: string; const AProc: TEnumerateCommandOptionsAction); overload;
     class procedure EnumerateCommands(const AProc: TEnumerateCommandAction); overload;
     class function GetCommandByName(const AName: string): ICommandDefinition;
 
@@ -299,17 +222,11 @@ type
     class procedure PrintUsage(const ACommand: ICommandDefinition; const AProc: TPrintUsageAction); overload;
     class procedure PrintUsage(const AProc: TPrintUsageAction); overload;
 
-    class function RegisterCommand(const AName, AAlias, ADescription, AHelpText, AUsage: string;
-      const AVisible: Boolean = True): TCommandDefinitionHelper;
-
-    class function RegisterAnonymousOption<T>(const AHelpText: string;
-      const AAction: TOptionValueParsedAction<T>): IOptionDefinition;
-    class function RegisterOption<T>(const ALongName, AShortName, AHelp: string;
-      const AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
-    class function RegisterOption<T>(const ALongName, AShortName: string;
-      AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
-    class function RegisterOption<T>(const ALongName: string;
-      const AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
+    class function RegisterCommand(const AName, AAlias, ADescription, AHelpText, AUsage: string; const AVisible: Boolean = True): TCommandDefinitionHelper;
+    class function RegisterAnonymousOption<T>(const AHelpText: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition;
+    class function RegisterOption<T>(const ALongName, AShortName, AHelp: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
+    class function RegisterOption<T>(const ALongName, AShortName: string; AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
+    class function RegisterOption<T>(const ALongName: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition; overload;
     { Properties }
     class property DefaultCommand: ICommandDefinition read Get_DefaultCommand;
     class property DescriptionTabSize: Integer read FDescriptionTabSize write FDescriptionTabSize;
@@ -359,7 +276,7 @@ const
     'Invalid option type: only string, integer, float, boolean, enum and ' +
     'set types are supported.';
   SOptionValueMissing =
-    'Option [%s] expects a following %s <value>, but none was found.';
+    'Option [%s] expects a <value> following %s, but none was found.';
 
 implementation
 
@@ -376,7 +293,7 @@ type
   IInternalParseResult = interface
     ['{9EADABED-511B-4095-9ACA-A5E431AB653D}']
     procedure AddError(const AError: string);
-    procedure SetCommand(const ACmd: ICommandDefinition);
+    procedure SetCommand(const ACommand: ICommandDefinition);
     function Get_Command: ICommandDefinition;
     { Properties }
     property Command: ICommandDefinition read Get_Command;
@@ -464,24 +381,23 @@ type
   strict private
     FAnonymousIndex: Integer;
     FNameValueSeparator: string;
-
-    function HasOptionToken(var ACmdlineItem: string): Boolean;
-
-    procedure DoParse(const ACmdlineItems: TStrings; const AParseResult: IInternalParseResult);
-    function InvokeOption(AOption: IOptionDefinition; const AName, AValue: string;
-      AUseNameAsValue: Boolean; out AErrMsg: string): Boolean;
+    {$REGION 'Private Helper Methods'}
+    function ParseCommand(const ACmdlineItem: string; var AActiveCommand: ICommandDefinition; const AParseResult: IInternalParseResult): Boolean;
+    function ParseOption(const ACmdlineItem: string; const AActiveCommand: ICommandDefinition; out AOption: IOptionDefinition; out AOptionValue: string; const AParseResult: IInternalParseResult): Boolean;
     procedure ParseOptionFile(const AFileName: string; const AParseResult: IInternalParseResult);
-    procedure ValidateParseResult(const AParseResult: IInternalParseResult);
-
-    function TryGetCommand(const ACmdName: string; var ACmd: ICommandDefinition): Boolean;
-    function TryGetOption(const ACurCmd, ADefCmd: ICommandDefinition; const AOptionName: string;
-      var AOption: IOptionDefinition): Boolean;
-  protected
-    function Parse: ICmdlineParseResult; overload;
-    function Parse(const ACmdlineItems: TStrings): ICmdlineParseResult; overload;
+    function InvokeOption(AOption: IOptionDefinition; const AValue: string; out AErrMsg: string): Boolean;
+    function HasOptionToken(var ACmdlineItem: string): Boolean;
+    function TryGetCommand(const AName: string; out ACommand: ICommandDefinition): Boolean;
+    function TryGetOption(const ACommand, ADefaultCommand: ICommandDefinition; const AOptionName: string; out AOption: IOptionDefinition): Boolean;
+    {$ENDREGIOn}
+  strict protected
+    procedure DoParse(const ACmdlineItems: TStrings; const AParseResult: IInternalParseResult); virtual;
+    procedure ValidateParseResult(const AParseResult: IInternalParseResult); virtual;
   public
     constructor Create(const aNameValueSeparator: string);
     destructor Destroy; override;
+    function Parse: ICmdlineParseResult; overload;
+    function Parse(const ACmdlineItems: TStrings): ICmdlineParseResult; overload;
   end;
 
 class constructor TOptionsRegistry.Create;
@@ -504,8 +420,7 @@ begin
   FCommands.Clear;
 end;
 
-class procedure TOptionsRegistry.EmumerateCommandOptions(const ACommandName: string;
-  const AProc: TEnumerateCommandOptionsAction);
+class procedure TOptionsRegistry.EmumerateCommandOptions(const ACommandName: string; const AProc: TEnumerateCommandOptionsAction);
 var
   LCommand: ICommandDefinition;
 begin
@@ -519,7 +434,6 @@ class procedure TOptionsRegistry.EnumerateCommands(const AProc: TEnumerateComman
 var
   LCommand: ICommandDefinition;
 begin
-  // The commandDefs are stored in a dictionary, so we need to sort them ourselves.
   var LCommands := TList<ICommandDefinition>.Create;
 
   try
@@ -667,14 +581,12 @@ begin
   PrintUsage(FDefaultCommandHelper.Command, AProc);
 end;
 
-class function TOptionsRegistry.RegisterAnonymousOption<T>(const AHelpText: string;
-  const AAction: TOptionValueParsedAction<T>): IOptionDefinition;
+class function TOptionsRegistry.RegisterAnonymousOption<T>(const AHelpText: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition;
 begin
   Result := FDefaultCommandHelper.RegisterAnonymousOption<T>(AHelpText, AAction);
 end;
 
-class function TOptionsRegistry.RegisterCommand(const AName, AAlias, ADescription, AHelpText, AUsage: string;
-  const AVisible: Boolean = True): TCommandDefinitionHelper;
+class function TOptionsRegistry.RegisterCommand(const AName, AAlias, ADescription, AHelpText, AUsage: string; const AVisible: Boolean = True): TCommandDefinitionHelper;
 var
   LCommand: ICommandDefinition;
   LParams: TCommandDefinitionCreateParams;
@@ -694,21 +606,18 @@ begin
   Result := TCommandDefinitionHelper.Create(LCommand);
 end;
 
-class function TOptionsRegistry.RegisterOption<T>(const ALongName, AShortName, AHelp: string;
-  const AAction: TOptionValueParsedAction<T>): IOptionDefinition;
+class function TOptionsRegistry.RegisterOption<T>(const ALongName, AShortName, AHelp: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition;
 begin
   Result := RegisterOption<T>(ALongName, AShortName, AAction);
   Result.HelpText := AHelp;
 end;
 
-class function TOptionsRegistry.RegisterOption<T>(const ALongName, AShortName: string;
-  AAction: TOptionValueParsedAction<T>): IOptionDefinition;
+class function TOptionsRegistry.RegisterOption<T>(const ALongName, AShortName: string; AAction: TOptionValueParsedAction<T>): IOptionDefinition;
 begin
   Result := FDefaultCommandHelper.RegisterOption<T>(ALongName, AShortName, AAction);
 end;
 
-class function TOptionsRegistry.RegisterOption<T>(const ALongName: string;
-  const AAction: TOptionValueParsedAction<T>): IOptionDefinition;
+class function TOptionsRegistry.RegisterOption<T>(const ALongName: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition;
 begin
   Result := RegisterOption<T>(ALongName, '', AAction);
 end;
@@ -738,28 +647,25 @@ begin
   Result := FCommand.Usage;
 end;
 
-function TCommandDefinitionHelper.HasOption(const AName: string): Boolean;
+function TCommandDefinitionHelper.HasOption(const AOptionName: string): Boolean;
 begin
-  Result := FCommand.HasOption(AName);
+  Result := FCommand.HasOption(AOptionName);
 end;
 
-function TCommandDefinitionHelper.RegisterAnonymousOption<T>(const AHelp: string;
-  const AAction: TOptionValueParsedAction<T>): IOptionDefinition;
+function TCommandDefinitionHelper.RegisterAnonymousOption<T>(const AHelp: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition;
 begin
   Result := TOptionDefinition<T>.Create('', '', AHelp, AAction);
   Result.RequiresValue := False;
   FCommand.AddOption(Result);
 end;
 
-function TCommandDefinitionHelper.RegisterOption<T>(const ALongName, AShortName, AHelp: string;
-  const AAction: TOptionValueParsedAction<T>): IOptionDefinition;
+function TCommandDefinitionHelper.RegisterOption<T>(const ALongName, AShortName, AHelp: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition;
 begin
   Result := RegisterOption<T>(ALongName, AShortName, AAction);
   Result.HelpText := AHelp;
 end;
 
-function TCommandDefinitionHelper.RegisterOption<T>(const ALongName, AShortName: string;
-  const AAction: TOptionValueParsedAction<T>): IOptionDefinition;
+function TCommandDefinitionHelper.RegisterOption<T>(const ALongName, AShortName: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition;
 begin
   if ALongName.IsEmpty then
     raise EArgumentException.Create(SOptionNameMissing);
@@ -774,8 +680,7 @@ begin
   FCommand.AddOption(Result);
 end;
 
-function TCommandDefinitionHelper.RegisterOption<T>(const ALongName: string;
-  const AAction: TOptionValueParsedAction<T>): IOptionDefinition;
+function TCommandDefinitionHelper.RegisterOption<T>(const ALongName: string; const AAction: TOptionValueParsedAction<T>): IOptionDefinition;
 begin
   Result := RegisterOption<T>(ALongName, '', AAction);
 end;
@@ -855,10 +760,10 @@ begin
       function(const L, R: IOptionDefinition): Integer
       begin
         Result := CompareText(L.LongName, R.LongName); // Longname is garantteed to be not empty.
-      end));
+      end)
+    );
 
-    for var o in LNamedOptions do
-      AProc(o);
+    for var o in LNamedOptions do AProc(o);
   finally
     LNamedOptions.Free;
   end;
@@ -925,15 +830,13 @@ begin
   Result := FRegisteredNamedOptionsDictionary.TryGetValue(LowerCase(AName), AOption);
 end;
 
-constructor TOptionDefinition<T>.Create(const ALongName, AShortName, AHelp: string;
-  const AProc: TOptionValueParsedAction<T>);
+constructor TOptionDefinition<T>.Create(const ALongName, AShortName, AHelp: string; const AProc: TOptionValueParsedAction<T>);
 begin
   Create(ALongName, AShortName, AProc);
   FHelpText := AHelp;
 end;
 
-constructor TOptionDefinition<T>.Create(const ALongName, AShortName: string;
-  const AProc: TOptionValueParsedAction<T>);
+constructor TOptionDefinition<T>.Create(const ALongName, AShortName: string; const AProc: TOptionValueParsedAction<T>);
 const
   kAllowedTypeKinds: set of TTypeKind = [tkInteger, tkEnumeration, tkFloat, tkString,
     tkSet, tkLString, tkWString, tkInt64, tkUString];
@@ -943,13 +846,12 @@ begin
   if not (FTypeInfo.Kind in kAllowedTypeKinds) then
     raise EArgumentException.Create(SInvalidOptionType);
 
-  FLongName := ALongName; // If long name is empty, then the option is anonymous.
+  FLongName := ALongName;   // If long name is empty, then the option is anonymous.
   FShortName := AShortName;
-  FRequiresValue := True;  // Default is True!
   FProc := AProc;
-  // Explicitly initialize these boolean properties.
-  FIsOptionFile := False;
-  FRequired := False;
+  FRequiresValue := True;   // Default is True, a value is required.
+  FIsOptionFile := False;   // Default is False, not an option file.
+  FRequired := False;       // Default is False, not a required option.
   // Initialize the default value.
   InitOptionDefaultValue;
 end;
@@ -984,9 +886,20 @@ begin
   Result := FLongName;
 end;
 
+function TOptionDefinition<T>.Get_Name: string;
+const
+  sAnonymousOptionName = 'unnamed';
+begin
+  if IsAnonymous then
+    Result := sAnonymousOptionName
+  else
+    Result := Format('%s(%s)', [LongName, ShortName]);
+end;
+
 function TOptionDefinition<T>.Get_Required: Boolean;
 begin
-  Result := FRequired or IsAnonymous; // Anonymous option is always required.
+  // Anonymous option always required in order to enforce their positions.
+  Result := FRequired or IsAnonymous;
 end;
 
 function TOptionDefinition<T>.Get_ShortName: string;
@@ -997,7 +910,8 @@ end;
 procedure TOptionDefinition<T>.InitOptionDefaultValue;
 begin
   FDefault := Default (T);
-
+  // Note - the default value for Boolean option is True. If the option name (the flag)
+  // appears without a value, by default it will be treated as True.
   if not FRequiresValue and (FTypeInfo.Name = StrBoolean) then
     FDefault := TValue.FromVariant(True).AsType<T>;
 end;
@@ -1108,6 +1022,48 @@ begin
   inherited;
 end;
 
+procedure TCmdlineParser.DoParse(const ACmdlineItems: TStrings; const AParseResult: IInternalParseResult);
+var
+  LOptionValue, LErrStr, LCmdlineItem : string;
+  LOption: IOptionDefinition;
+begin
+  var LActiveCommand := TOptionsRegistry.DefaultCommand;
+
+  for var I := 0 to ACmdlineItems.Count - 1 do begin
+    LCmdlineItem := ACmdlineItems.Strings[I];
+
+    // LCmdlineItem possibly empty, if inside quotes.
+    if LCmdlineItem.IsEmpty then
+      Continue;
+
+    // Find if a new command appears, if so, set it as currently active command. Returns true if a new command
+    // is set as currently active command. And if a new command is found, skip the rest.
+    if ParseCommand(LCmdlineItem, LActiveCommand, AParseResult) then
+      Continue;
+
+    if not ParseOption(LCmdlineItem, LActiveCommand, LOption, LOptionValue, AParseResult) then
+      Continue;
+
+    if LOption.RequiresValue and LOptionValue.IsEmpty then begin
+      AParseResult.AddError(Format(SOptionValueMissing, [LOption.Name, FNameValueSeparator]));
+      Continue;
+    end;
+
+    if LOption.IsOptionFile then begin
+      if not FileExists(LOptionValue) then begin
+        AParseResult.AddError(Format(SParamFileMissing, [LOptionValue]));
+        Continue;
+      end else begin
+        ParseOptionFile(LOptionValue, AParseResult);
+        // Option file override all other options; and will stop the parsing.
+        Break;
+      end;
+    end;
+
+    if not InvokeOption(LOption, LOptionValue, LErrStr) then AParseResult.AddError(LErrStr);
+  end;
+end;
+
 function TCmdlineParser.HasOptionToken(var ACmdlineItem: string): Boolean;
 begin
   Result := False;
@@ -1121,109 +1077,93 @@ begin
   end;
 end;
 
-function TCmdlineParser.InvokeOption(AOption: IOptionDefinition; const AName, AValue: string;
-  AUseNameAsValue: Boolean; out AErrMsg: string): Boolean;
+function TCmdlineParser.InvokeOption(AOption: IOptionDefinition; const AValue: string; out AErrMsg: string): Boolean;
 begin
-  Result := True;
-  AErrMsg := EmptyStr;
-
   try
-    if AUseNameAsValue then
-      (AOption as IOptionDefinitionInvoke).Invoke(AName)
-    else
-      (AOption as IOptionDefinitionInvoke).Invoke(AValue);
+    (AOption as IOptionDefinitionInvoke).Invoke(AValue);
+    Result := True;
   except
-    on E: Exception do
-    begin
+    on E: Exception do begin
       Result := False;
-      AErrMsg := Format(SErrSettingOption, [AName, AValue, E.Message]);
+      AErrMsg := Format(SErrSettingOption, [AOption.Name, AValue, E.Message]);
     end;
   end;
 end;
 
-// Anonymous option will be checked within current command only. Because, to check
-// further within default command, we would need maintain two anonymous index, for
-// default and current command respective. That is unnecessarily complicated.
-procedure TCmdlineParser.DoParse(const ACmdlineItems: TStrings; const AParseResult: IInternalParseResult);
-var
-  LOptionName, LOptionValue, LErrStr, LCmdlineItem: string;
-  LCurCommand, LNewCommand: ICommandDefinition;
-  LNameValueSeperatorPos: Integer;
-  LOption: IOptionDefinition;
-  LSeekValue, LUseNameAsValue: Boolean;
+function TCmdlineParser.Parse: ICmdlineParseResult;
 begin
-  LCurCommand := TOptionsRegistry.DefaultCommand;
+  FAnonymousIndex := 0; // Reset anonymous option position to 0.
+  var LCmdlineItems := TStringList.Create;
 
-  for var I := 0 to ACmdlineItems.Count - 1 do
-  begin
-    LNameValueSeperatorPos := 0;
-    LOption := nil;
-    LSeekValue := True;
-    LUseNameAsValue := False;
-    LCmdlineItem := ACmdlineItems.Strings[I];
-
-    if LCmdlineItem.IsEmpty then // Possible, if inside quotes.
-      Continue;
-
-    if not HasOptionToken(LCmdlineItem) then begin
-      if LCurCommand.IsDefault and TryGetCommand(LCmdlineItem, LNewCommand) then begin
-        LCurCommand := LNewCommand;
-        LNewCommand := nil;
-        AParseResult.SetCommand(LCurCommand); //Set only once, when current command is default.
-        FAnonymousIndex := 0; // FAnonymousIndex reset here!
-        Continue;
-      end else begin
-        //Anonymous LOption only checked within current command.
-        if FAnonymousIndex < LCurCommand.RegisteredAnonymousOptions.Count then begin
-          LOption := LCurCommand.RegisteredAnonymousOptions.Items[FAnonymousIndex];
-          Inc(FAnonymousIndex);
-          LSeekValue := False;
-          LUseNameAsValue := True;
-        end else begin
-          AParseResult.AddError(Format(SUnknownAnonymousOption, [ACmdlineItems.Strings[I]]));
-          Continue;
-        end;
-      end;
+  try
+    if ParamCount > 0 then begin
+      for var I := 1 to ParamCount do
+        LCmdlineItems.Add(ParamStr(I)); // Excluding ParamStr(0)
     end;
 
-    if LSeekValue then
-      LNameValueSeperatorPos := Pos(FNameValueSeparator, LCmdlineItem);
+    Result := Parse(LCmdlineItems);
+  finally
+    LCmdlineItems.Free;
+  end;
+end;
 
-    if LNameValueSeperatorPos > 0 then begin
-      LOptionName := Copy(LCmdlineItem, 1, LNameValueSeperatorPos - 1);
-      LOptionValue := Copy(LCmdlineItem, LNameValueSeperatorPos + Length(FNameValueSeparator), MaxInt);
-      StripQuotes(LOptionValue);
+function TCmdlineParser.Parse(const ACmdlineItems: TStrings): ICmdlineParseResult;
+begin
+  Result := TCmdlineParseResult.Create;
+  DoParse(ACmdlineItems, Result as IInternalParseResult);
+  ValidateParseResult(Result as IInternalParseResult);
+end;
+
+function TCmdlineParser.ParseCommand(const ACmdlineItem: string; var AActiveCommand: ICommandDefinition; const AParseResult: IInternalParseResult): Boolean;
+begin
+  // Check if the command line item has option token. Do NOT strip off the token if any.
+  var LCmdlineItem := ACmdlineItem;
+  if HasOptionToken(LCmdlineItem) then Exit(False);
+
+  var LNewCommand: ICommandDefinition;
+  Result := AActiveCommand.IsDefault and TryGetCommand(ACmdlineItem, LNewCommand);
+
+  if Result then begin
+    AActiveCommand := LNewCommand;
+    FAnonymousIndex := 0;
+    AParseResult.SetCommand(AActiveCommand);
+  end;
+end;
+
+function TCmdlineParser.ParseOption(const ACmdlineItem: string; const AActiveCommand: ICommandDefinition; out AOption: IOptionDefinition; out AOptionValue: string; const AParseResult: IInternalParseResult): Boolean;
+begin
+  // Check if there is any option token, and strip off if any.
+  var LCmdlineItem := ACmdlineItem;
+
+  if not HasOptionToken(LCmdlineItem) then begin
+    // The command line item represents an anonymous option of the currently active command.
+    if FAnonymousIndex < AActiveCommand.RegisteredAnonymousOptions.Count then  begin
+      AOption := AActiveCommand.RegisteredAnonymousOptions[FAnonymousIndex];
+      Inc(FAnonymousIndex);
+      AOptionValue := LCmdlineItem;
+      Result := True;
     end else begin
-      LOptionName := LCmdlineItem;
-      LOptionValue := EmptyStr;
+      AParseResult.AddError(Format(SUnknownAnonymousOption, [LCmdlineItem]));
+      Result := False;
+    end;
+  end else begin
+    // The command line item represents a named option
+    var LNameValueSeparatorPos := Pos(FNameValueSeparator, LCmdlineItem);
+    var LOptionName: string;
+
+    if LNameValueSeparatorPos > 0 then begin
+      // The named option has a name, and a value.
+      LOptionName  := Copy(LCmdlineItem, 1, LNameValueSeparatorPos - 1).Trim;
+      AOptionValue := Copy(LCmdlineItem, LNameValueSeparatorPos + Length(FNameValueSeparator), MaxInt).Trim;
+      StripQuotes(AOptionValue);
+    end else begin
+      // The named option has a name, without a value.
+      LOptionName  := LCmdlineItem;
+      AOptionValue := EmptyStr;
     end;
 
-    // if at this point, LOption is nil, then will try get it
-    if not TryGetOption(LCurCommand, TOptionsRegistry.DefaultCommand, LOptionName, LOption) then begin
-      AParseResult.AddError(Format(SUnknownOption, [LOptionName]));
-      Continue;
-    end;
-
-    if LOption.RequiresValue and LOptionValue.IsEmpty then begin
-      AParseResult.AddError(Format(SOptionValueMissing, [LOptionName, FNameValueSeparator]));
-      Continue;
-    end;
-
-    if LOption.IsOptionFile then begin
-      if not LOption.RequiresValue then
-        LOptionValue := LOptionName;
-
-      if not FileExists(LOptionValue) then begin
-        AParseResult.AddError(Format(SParamFileMissing, [LOptionValue]));
-        Continue;
-      end else begin
-        ParseOptionFile(LOptionValue, AParseResult);
-        Break; //LOption file override all other options; and will stop the parsing.
-      end;
-    end;
-
-    if not InvokeOption(LOption, LOptionName, LOptionValue, LUseNameAsValue, LErrStr) then
-      AParseResult.AddError(LErrStr);
+    Result := TryGetOption(AActiveCommand, TOptionsRegistry.DefaultCommand, LOptionName, AOption);
+    if not Result then AParseResult.AddError(Format(SUnknownOption, [LOptionName]));
   end;
 end;
 
@@ -1237,6 +1177,22 @@ begin
   finally
     LCmdline.Free;
   end;
+end;
+
+function TCmdlineParser.TryGetCommand(const AName: string; out ACommand: ICommandDefinition): Boolean;
+begin
+  Result := TOptionsRegistry.RegisteredCommands.TryGetValue(LowerCase(AName), ACommand);
+end;
+
+function TCmdlineParser.TryGetOption(const ACommand, ADefaultCommand: ICommandDefinition; const AOptionName: string; out AOption: IOptionDefinition): Boolean;
+begin
+  if not ACommand.TryGetOption(LowerCase(AOptionName), AOption) then begin
+    // Continue to search the option in defaul command.
+    if not ACommand.IsDefault then
+      ADefaultCommand.TryGetOption(LowerCase(AOptionName), AOption);
+  end;
+
+  Result := Assigned(AOption);
 end;
 
 procedure TCmdlineParser.ValidateParseResult(const AParseResult: IInternalParseResult);
@@ -1267,49 +1223,6 @@ begin
       end;
     end;
   end;
-end;
-
-function TCmdlineParser.Parse: ICmdlineParseResult;
-begin
-  FAnonymousIndex := 0; // Reset anonymous option position to 0.
-  var LCmdlineItems := TStringList.Create;
-
-  try
-    if ParamCount > 0 then begin
-      for var I := 1 to ParamCount do
-        LCmdlineItems.Add(ParamStr(I)); // Excluding ParamStr(0)
-    end;
-
-    Result := Parse(LCmdlineItems);
-  finally
-    LCmdlineItems.Free;
-  end;
-end;
-
-function TCmdlineParser.Parse(const ACmdlineItems: TStrings): ICmdlineParseResult;
-begin
-  Result := TCmdlineParseResult.Create;
-  DoParse(ACmdlineItems, Result as IInternalParseResult);
-  ValidateParseResult(Result as IInternalParseResult);
-end;
-
-function TCmdlineParser.TryGetCommand(const ACmdName: string; var ACmd: ICommandDefinition): Boolean;
-begin
-  Result := TOptionsRegistry.RegisteredCommands.TryGetValue(LowerCase(ACmdName), ACmd);
-end;
-
-function TCmdlineParser.TryGetOption(const ACurCmd: ICommandDefinition; const ADefCmd: ICommandDefinition;
-  const AOptionName: string; var AOption: IOptionDefinition): Boolean;
-begin
-  if not Assigned(AOption) then
-  begin
-    if not ACurCmd.TryGetOption(LowerCase(AOptionName), AOption) then begin
-      if not ACurCmd.IsDefault then
-        ADefCmd.TryGetOption(LowerCase(AOptionName), AOption); // Last resort to find an option.
-    end;
-  end;
-
-  Result := Assigned(AOption);
 end;
 
 constructor TCmdlineParseResult.Create;
@@ -1356,7 +1269,6 @@ procedure TCmdlineParseResult.SetCommand(const ACommand: ICommandDefinition);
 begin
   FCommand := ACommand;
 end;
-
 
 initialization
 
