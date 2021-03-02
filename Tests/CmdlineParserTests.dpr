@@ -7,7 +7,7 @@ uses
   DUnitX.Loggers.Console,
   DUnitX.Loggers.Xml.NUnit,
   DUnitX.TestFramework,
-  CmdlineParserTests.TestObject in 'CmdLineParserTests.TestObject.pas';
+  CmdlineParserTests.TestObject in 'CmdlineParserTests.TestObject.pas';
 
 var
   logger: ITestLogger;
@@ -17,6 +17,7 @@ var
 
 begin
   try
+    ReportMemoryLeaksOnShutdown := True;
     TDUnitX.CheckCommandLine;
     // Create the runner
     runner := TDUnitX.CreateRunner;
