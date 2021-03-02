@@ -5,7 +5,7 @@ program CommandSample;
 
 uses
   System.SysUtils,
-  CmdLine.OptionsRegistry,
+  CmdlineParser,
   uCommandSampleConfig in 'uCommandSampleConfig.pas',
   uCommandSampleOptions in 'uCommandSampleOptions.pas';
 
@@ -14,6 +14,7 @@ var
 
 begin
   try
+    ConfigureOptions;
     //parse the command line options
     ParseResult := TOptionsRegistry.Parse;
 
@@ -44,6 +45,7 @@ begin
         Writeln('Help Command : ' + THelpOptions.HelpCommand);
         Writeln('Output Path : ' + TInstallOptions.OutPath);
         Writeln('Global Output Path : ' + TGlobalOptions.OutPath);
+        Writeln('Global Verbose:', TGlobalOptions.Verbose);
       end;
     end;
 

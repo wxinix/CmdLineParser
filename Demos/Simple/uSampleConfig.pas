@@ -5,7 +5,7 @@ interface
 implementation
 
 uses
-  CmdLine.OptionsRegistry, uSampleOptions;
+  CmdlineParser, uSampleOptions;
 
 procedure ConfigureOptions;
 var

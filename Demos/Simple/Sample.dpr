@@ -5,7 +5,7 @@ program Sample;
 
 uses
   System.SysUtils,
-  CmdLine.OptionsRegistry,
+  CmdlineParser,
   uSampleConfig in 'uSampleConfig.pas',
   uSampleOptions in 'uSampleOptions.pas';
 
