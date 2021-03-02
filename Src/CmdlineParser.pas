@@ -326,6 +326,8 @@ const
     = 'Unknown anonymous option: %s.';
   SUsage
     = 'usage: ';
+  SCommandNameMissing
+    = 'Command name required';
   SOptionNameMissing
     = 'Option name required - use RegisterAnonymousOption for unnamed options.';
   SInvalidOptionType
@@ -773,6 +775,9 @@ end;
 class function TOptionsRegistry.RegisterCommand(const AName, AAlias, ADescription, AHelpText, AUsage: string;
   const AVisible: Boolean = True): TCommandDefinitionHelper;
 begin
+  if Aname.IsEmpty then
+    raise EArgumentException.Create(SCommandNameMissing);
+
   var LParams: TCommandDefinitionCreateParams;
   with LParams do
   begin
@@ -785,7 +790,7 @@ begin
     Visible := AVisible;
   end;
 
-  var LCommand := TCommandDefinition.Create(LParams);
+  var LCommand: ICommandDefinition := TCommandDefinition.Create(LParams);
   FCommands.Add(AName.ToLower, LCommand);
   Result := TCommandDefinitionHelper.Create(LCommand);
 end;
