@@ -91,10 +91,10 @@ uses
 
 procedure TCmdLineParserTests.Can_Parse_ColonEqualNameValueSeparator;
 var
-  LTestStr: string;
+  LTestStr: String;
 begin
   TOptionsRegistry.RegisterOption<string>('test', 't',
-    procedure(const aValue: string)
+    procedure(const aValue: String)
     begin
       LTestStr := aValue;
     end);
@@ -137,10 +137,10 @@ end;
 
 procedure TCmdLineParserTests.Can_Parse_EqualNameValueSeparator;
 var
-  LTestStr: string;
+  LTestStr: String;
 begin
   TOptionsRegistry.RegisterOption<string>('test', 't',
-    procedure(const aValue: string)
+    procedure(const aValue: String)
     begin
       LTestStr := aValue;
     end);
@@ -160,19 +160,19 @@ end;
 
 procedure TCmdLineParserTests.Can_Parse_Multiple_Anonymous_Parameters;
 var
-  LFileName_1, LFileName_2: string;
+  LFileName_1, LFileName_2: String;
   LTestBool: Boolean;
 begin
   TOptionsRegistry.RegisterAnonymousOption<string>
     ('the file we want to process',
-    procedure(const aValue: string)
+    procedure(const aValue: String)
     begin
       LFileName_1 := aValue;
     end);
 
   TOptionsRegistry.RegisterAnonymousOption<string>
     ('the second file we want to process',
-    procedure(const aValue: string)
+    procedure(const aValue: String)
     begin
       LFileName_2 := aValue;
     end);
@@ -202,16 +202,16 @@ end;
 
 procedure TCmdLineParserTests.Can_Parse_Quoted_Value;
 var
-  LTestStr_1, LTestStr_2: string;
+  LTestStr_1, LTestStr_2: String;
 begin
   TOptionsRegistry.RegisterOption<string>('test', 't',
-    procedure(const aValue: string)
+    procedure(const aValue: String)
     begin
       LTestStr_1 := aValue;
     end);
 
   TOptionsRegistry.RegisterOption<string>('test2', 't2',
-    procedure(const aValue: string)
+    procedure(const aValue: String)
     begin
       LTestStr_2 := aValue;
     end);
@@ -255,11 +255,11 @@ end;
 
 procedure TCmdLineParserTests.Can_Parse_Anonymous_Parameter;
 var
-  LTestStr: string;
+  LTestStr: String;
 begin
   TOptionsRegistry.RegisterAnonymousOption<string>
     ('the file we want to process',
-    procedure(const aValue: string)
+    procedure(const aValue: String)
     begin
       LTestStr := aValue;
     end);
@@ -321,7 +321,7 @@ end;
 procedure TCmdLineParserTests.Can_Register_Anonymous_Parameter;
 begin
   var LOption := TOptionsRegistry.RegisterAnonymousOption<string>('the file we want to process',
-    procedure(const value: string)
+    procedure(const value: String)
     begin
     end);
 
@@ -364,17 +364,17 @@ end;
 
 procedure TCmdLineParserTests.Will_Generate_Error_For_Extra_Unamed_Parameter;
 var
-  LFileName, LTestStr: string;
+  LFileName, LTestStr: String;
 begin
   TOptionsRegistry.RegisterAnonymousOption<string>
     ('the file we want to process',
-    procedure(const aValue: string)
+    procedure(const aValue: String)
     begin
       LFileName := aValue;
     end);
 
   TOptionsRegistry.RegisterOption<string>('test', 't',
-    procedure(const aValue: string)
+    procedure(const aValue: String)
     begin
       LTestStr := aValue;
     end);
