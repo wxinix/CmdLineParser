@@ -195,7 +195,7 @@ type
     property IsAnonymous: Boolean read Get_IsAnonymous;
     property IsOptionFile: Boolean read Get_IsOptionFile write Set_IsOptionFile;
     property LongName: String read Get_LongName;
-    property Name:string read Get_Name;
+    property Name: String read Get_Name;
     property Required: Boolean read Get_Required write Set_Required;
     property RequiresValue: Boolean read Get_RequiresValue write Set_RequiresValue;
     property ShortName: String read Get_ShortName;
@@ -203,7 +203,7 @@ type
 
   TOptionsRegistry = class
   strict private class var
-    FCommands: TDictionary<string, ICommandDefinition>;
+    FCommands: TDictionary<String, ICommandDefinition>;
     FConsoleWidth: Integer;
     FDefaultCommandHelper: TCommandDefinitionHelper;
     FDescriptionTabSize: Integer;
@@ -244,7 +244,7 @@ type
     class property DefaultCommand: ICommandDefinition read Get_DefaultCommand;
     class property DescriptionTabSize: Integer read FDescriptionTabSize write FDescriptionTabSize;
     class property NameValueSeparator: String read FNameValueSeparator write FNameValueSeparator;
-    class property RegisteredCommands: TDictionary<string, ICommandDefinition> read FCommands;
+    class property RegisteredCommands: TDictionary<String, ICommandDefinition> read FCommands;
   end;
 
 {$REGION 'Utility Functions'}
@@ -259,7 +259,7 @@ function GetConsoleWidth: Integer;
 /// <param name="AMaxLen">
 ///   Maximum number of characters of each string.
 /// </param>
-function SplitText(const AText: String; const AMaxLen: Integer): TArray<string>;
+function SplitText(const AText: String; const AMaxLen: Integer): TArray<String>;
 
 /// <summary>
 ///   Split a given string into array of strings; each string element not exceeding maximum number of
@@ -271,7 +271,7 @@ function SplitText(const AText: String; const AMaxLen: Integer): TArray<string>;
 /// <param name="ASrcStr">
 ///   Source string to be divided.
 /// </param>
-function SplitStringAt(const ALen: Integer; const ASrcStr: String): TArray<string>;
+function SplitStringAt(const ALen: Integer; const ASrcStr: String): TArray<String>;
 
 /// <summary>
 ///   Convert a Boolean compatible string to Boolean type.
@@ -295,7 +295,7 @@ const
   ShortNameExtraSpaceSize   = 5;
 
 const
-  OptionTokens: array [1 .. 4] of string = ('--', '-', '/', '@');
+  OptionTokens: array [1 .. 4] of String = ('--', '-', '/', '@');
 
 const
   SErrParsingParamFile
@@ -336,9 +336,9 @@ const
     = 'Option [%s] expects a <value> following %s, but none was found.';
 
 const
-  TrueStrings: array [0 .. 10] of string = ('True', 'T', '+', 'Yes', 'Y', 'On',
+  TrueStrings: array [0 .. 10] of String = ('True', 'T', '+', 'Yes', 'Y', 'On',
     'Enable', 'Enabled', '1', '-1', '');
-  FalseStrings: array [0 .. 8] of string = ('False', 'F', '-', 'No', 'N', 'Off',
+  FalseStrings: array [0 .. 8] of String = ('False', 'F', '-', 'No', 'N', 'Off',
     'Disable', 'Disabled', '0');
 
 implementation
@@ -352,7 +352,7 @@ uses
   System.StrUtils,
   System.SysUtils;
 
-function SplitStringAt(const ALen: Integer; const ASrcStr: String): TArray<string>;
+function SplitStringAt(const ALen: Integer; const ASrcStr: String): TArray<String>;
 begin
   SetLength(Result, 0);
   var LSrcLen := Length(ASrcStr);
@@ -376,7 +376,7 @@ begin
   end;
 end;
 
-function SplitText(const AText: String; const AMaxLen: Integer): TArray<string>;
+function SplitText(const AText: String; const AMaxLen: Integer): TArray<String>;
 begin
   SetLength(Result, 0);
 
@@ -489,7 +489,7 @@ type
     FName: String;
     FRegisteredAnonymousOptions: TList<IOptionDefinition>;
     FRegisteredNamedOptions: TList<IOptionDefinition>;
-    FRegisteredNamedOptionsDictionary: TDictionary<string, IOptionDefinition>;
+    FRegisteredNamedOptionsDictionary: TDictionary<String, IOptionDefinition>;
     FUsage: String;
     FVisible: Boolean;
     {$REGION 'Property Gettors and Settors'}
@@ -580,7 +580,7 @@ type
 class constructor TOptionsRegistry.Create;
 begin
   FDefaultCommandHelper := TCommandDefinitionHelper.Create(TCommandDefinition.CreateDefault);
-  FCommands := TDictionary<string, ICommandDefinition>.Create;
+  FCommands := TDictionary<String, ICommandDefinition>.Create;
   FNameValueSeparator := ':';  // Default separator.
   FDescriptionTabSize := DefaultDescriptionTabSize;
   FConsoleWidth := GetConsoleWidth; // This is a system function.
@@ -597,8 +597,7 @@ begin
   FCommands.Clear;
 end;
 
-class procedure TOptionsRegistry.EmumerateCommandOptions(const ACommandName: String;
-  const AProc: TEnumerateCommandOptionsAction);
+class procedure TOptionsRegistry.EmumerateCommandOptions(const ACommandName: String; const AProc: TEnumerateCommandOptionsAction);
 var
   LCommand: ICommandDefinition;
 begin
@@ -889,7 +888,7 @@ begin
     FVisible := Visible;
   end;
 
-  FRegisteredNamedOptionsDictionary := TDictionary<string, IOptionDefinition>.Create;
+  FRegisteredNamedOptionsDictionary := TDictionary<String, IOptionDefinition>.Create;
   FRegisteredNamedOptions := TList<IOptionDefinition>.Create;
   FRegisteredAnonymousOptions := TList<IOptionDefinition>.Create;
 end;
@@ -1146,7 +1145,7 @@ begin
 
     tkString, tkLString, tkWString, tkUString:
       begin
-        LValue := TValue.From<string>(AValueStr);
+        LValue := TValue.From<String>(AValueStr);
       end;
 
     tkSet:
